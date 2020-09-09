@@ -11,6 +11,8 @@ import {
   useParams,
 } from "react-router-dom";
 import { gql, useMutation, useQuery, useApolloClient } from "@apollo/client";
+import ReactMarkdown from "react-markdown";
+import toc from "remark-toc";
 
 interface PrivateRouteProps {
   isAuthenticated: boolean;
@@ -24,13 +26,13 @@ const PrivateRoute: React.FC<PrivateRouteProps & RouteProps> = ({ children, isAu
         isAuthenticated ? (
           children
         ) : (
-          <Redirect
-            to={{
-              pathname: "/login",
-              state: { from: location },
-            }}
-          />
-        )
+            <Redirect
+              to={{
+                pathname: "/login",
+                state: { from: location },
+              }}
+            />
+          )
       }
     />
   );
@@ -50,6 +52,8 @@ const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) =>
 
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const [error, setError] = React.useState("");
+
   const [login] = useMutation(LOGIN_MUTATION);
 
   const history = useHistory();
@@ -63,10 +67,17 @@ const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) =>
         window.localStorage.setItem("token", result.data.login.token);
         setIsAuthenticated(true);
         setIsLoading(false);
+        setError("");
 
         history.replace(from);
       })
-      .catch(() => {
+      .catch((e) => {
+        if (e && e.message) {
+          setError(e.message);
+        } else {
+          setError("Unexpected error. Please try again");
+        }
+
         setIsLoading(false);
       });
   };
@@ -92,7 +103,11 @@ const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) =>
         }}
       />
 
+      {isLoading && <p>Loading ...</p>}
+      {error && <p>Error: {error}</p>}
+
       <button
+        className="btn btn-primary"
         onClick={() => {
           performLogin();
         }}
@@ -124,6 +139,14 @@ const LINKS_QUERY = gql`
   }
 `;
 
+const UPDATE_METADATA_MUTATION = gql`
+  mutation UpdateMetadata($linkId: Int!) {
+    updateMetadata(linkId: $linkId) {
+      id
+    }
+  }
+`;
+
 const Links = () => {
   const [links, setLinks] = React.useState([]);
 
@@ -135,6 +158,14 @@ const Links = () => {
       console.log("Do some error handling");
     },
   });
+
+  const [updateMetaDataMutation] = useMutation(UPDATE_METADATA_MUTATION);
+
+  const updateMetadata = (linkId: number) => {
+    updateMetaDataMutation({ variables: { linkId } })
+      .then(() => { console.log("All good") })
+      .catch((e) => { console.log("Error", e) });
+  }
 
   const humanizeTime = (time: number): string => {
     if (time < 0.5) {
@@ -159,28 +190,39 @@ const Links = () => {
             description: string;
             metadata: { title: string; description: string; image: string; estimatedTimeToRead: number };
           },
-          idx
-        ) => {
+          idx) => {
           return (
             <div className="row" key={idx}>
               <div className="col-sm-4">
-                <div className="card">
+                {link.metadata ? <div className="card">
                   <img src={link.metadata.image} className="card-img-top" alt="Card for article" />
                   <div className="card-body">
                     <h5 className="card-title">{link.metadata.title}</h5>
                     <h6 className="card-subtitle mb-2 text-muted">{humanizeTime(link.metadata.estimatedTimeToRead)}</h6>
                     <p className="card-text">{link.metadata.description}</p>
 
-                    <a href={link.url} className="btn btn-primary">
+                    <a href={link.url} target="_blank" rel="noreferrer" className="btn btn-primary">
                       Go read
                     </a>
                   </div>
-                </div>
+                </div> : (<div>
+                  <p>No metadata</p>
+                  <button className="btn btn-primary" onClick={() => updateMetadata(link.id)}>Update metadata</button>
+                  <a href={link.url} target="_blank" rel="noreferrer">Check URL</a>
+                </div>)
+                }
               </div>
               <div className="col-sm-8">
                 <p>
                   Notes: <Link to={`/links/${link.id}/edit`}>edit</Link> <br />
-                  {link.description}
+                  <ReactMarkdown
+                    className="result"
+                    source={link.description}
+                    skipHtml={false}
+                    escapeHtml={false}
+                    // renderers={{code: CodeBlock}}
+                    plugins={[toc]}
+                  />
                 </p>
               </div>
             </div>
@@ -231,7 +273,7 @@ const EditLink = () => {
 
   const saveChanges = () => {
     updateLink({ variables: { id: Number.parseInt(id), url: url, description: notes } }).then(() => {
-        history.replace("/links");
+      history.replace("/links");
     });
   };
 
@@ -254,18 +296,38 @@ const EditLink = () => {
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="url" className="form-label">
-          Notes
+        <div className="row">
+          <div className="col">
+            <label htmlFor="url" className="form-label">
+              Notes
         </label>
-        <textarea
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-          name="notes"
-          id="notes"
-          className="form-control"
-          rows={5}
-        ></textarea>
+            <textarea
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
+              name="notes"
+              id="notes"
+              className="form-control"
+              rows={5}
+            ></textarea>
+
+          </div>
+          <div className="col">
+            <label className="form-label">
+              &nbsp;
+        </label>
+            <ReactMarkdown
+              className="result"
+              source={notes}
+              skipHtml={false}
+              escapeHtml={false}
+              // renderers={{code: CodeBlock}}
+              plugins={[toc]}
+            />
+
+          </div>
+        </div>
       </div>
+
 
       <button type="submit" className="btn btn-primary" onClick={() => saveChanges()}>
         Save changes
@@ -292,7 +354,7 @@ const CreateLink = () => {
 
   const createLink = () => {
     createLinkMutation({ variables: { url: url, description: notes } }).then(() => {
-        history.replace("/links");
+      history.replace("/links");
     });
   };
 
@@ -313,17 +375,36 @@ const CreateLink = () => {
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="url" className="form-label">
-          Notes
-        </label>
-        <textarea
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-          name="notes"
-          id="notes"
-          className="form-control"
-          rows={5}
-        ></textarea>
+        <div className="row">
+          <div className="col">
+            <label htmlFor="url" className="form-label">
+              Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
+              name="notes"
+              id="notes"
+              className="form-control"
+              rows={5}
+            ></textarea>
+
+          </div>
+          <div className="col">
+            <label className="form-label">
+              &nbsp;
+            </label>
+            <ReactMarkdown
+              className="result"
+              source={notes}
+              skipHtml={false}
+              escapeHtml={false}
+              // renderers={{code: CodeBlock}}
+              plugins={[toc]}
+            />
+
+          </div>
+        </div>
       </div>
 
       <button type="submit" className="btn btn-primary" onClick={() => createLink()}>
@@ -332,6 +413,7 @@ const CreateLink = () => {
     </>
   );
 };
+
 const SignOutButton = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) => void }) => {
   const client = useApolloClient();
   const history = useHistory();
@@ -405,32 +487,35 @@ export const App = () => {
                 {isAuthenticated ? (
                   <SignOutButton setIsAuthenticated={setIsAuthenticated} />
                 ) : (
-                  <Link className="btn btn-outline-light" to="/login">
-                    Login
-                  </Link>
-                )}
+                    <Link className="btn btn-outline-light" to="/login">
+                      Login
+                    </Link>
+                  )}
               </div>
             </div>
           </div>
         </nav>
 
-        <Switch>
-          <Route path="/login">
-            <Login setIsAuthenticated={setIsAuthenticated} />
-          </Route>
-          <PrivateRoute isAuthenticated={isAuthenticated} path="/links/create">
-            <CreateLink />
-          </PrivateRoute>
-          <PrivateRoute isAuthenticated={isAuthenticated} path="/links/:id/edit">
-            <EditLink />
-          </PrivateRoute>
-          <PrivateRoute isAuthenticated={isAuthenticated} path="/links">
-            <Links />
-          </PrivateRoute>
-          <Route path="/">
-            <Home />
-          </Route>
-        </Switch>
+        <div className="container">
+          <Switch>
+            <Route path="/login">
+              <Login setIsAuthenticated={setIsAuthenticated} />
+            </Route>
+            <PrivateRoute isAuthenticated={isAuthenticated} path="/links/create">
+              <CreateLink />
+            </PrivateRoute>
+            <PrivateRoute isAuthenticated={isAuthenticated} path="/links/:id/edit">
+              <EditLink />
+            </PrivateRoute>
+            <PrivateRoute isAuthenticated={isAuthenticated} path="/links">
+              <Links />
+            </PrivateRoute>
+            <Route path="/">
+              <Home />
+            </Route>
+          </Switch>
+
+        </div>
       </div>
     </Router>
   );
