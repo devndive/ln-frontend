@@ -13,6 +13,9 @@ import {
 import { gql, useMutation, useQuery, useApolloClient } from "@apollo/client";
 import ReactMarkdown from "react-markdown";
 import toc from "remark-toc";
+import { Home } from "./pages/Home";
+
+import "./index.scss";
 
 interface PrivateRouteProps {
   isAuthenticated: boolean;
@@ -118,10 +121,6 @@ const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) =>
   );
 };
 
-const Home = () => {
-  return <h1>Home</h1>;
-};
-
 const LINKS_QUERY = gql`
   query Links {
     links {
@@ -134,6 +133,9 @@ const LINKS_QUERY = gql`
         description
         image
         estimatedTimeToRead
+      }
+      tags {
+        name
       }
     }
   }
@@ -150,7 +152,7 @@ const UPDATE_METADATA_MUTATION = gql`
 const Links = () => {
   const [links, setLinks] = React.useState([]);
 
-  const { error } = useQuery(LINKS_QUERY, {
+  useQuery(LINKS_QUERY, {
     onCompleted: (data) => {
       setLinks(data.links);
     },
@@ -180,7 +182,7 @@ const Links = () => {
 
   return (
     <div>
-      <h1>Links</h1>
+      <h1 className="mb-5">Links</h1>
 
       {links.map(
         (
@@ -189,10 +191,11 @@ const Links = () => {
             url: string;
             description: string;
             metadata: { title: string; description: string; image: string; estimatedTimeToRead: number };
+            tags: { name: string; }[];
           },
           idx) => {
           return (
-            <div className="row" key={idx}>
+            <div className="row mb-5" key={idx}>
               <div className="col-sm-4">
                 {link.metadata ? <div className="card">
                   <img src={link.metadata.image} className="card-img-top" alt="Card for article" />
@@ -213,8 +216,7 @@ const Links = () => {
                 }
               </div>
               <div className="col-sm-8">
-                <p>
-                  Notes: <Link to={`/links/${link.id}/edit`}>edit</Link> <br />
+                  <p>Notes: <Link to={`/links/${link.id}/edit`}>edit</Link></p>
                   <ReactMarkdown
                     className="result"
                     source={link.description}
@@ -223,6 +225,8 @@ const Links = () => {
                     // renderers={{code: CodeBlock}}
                     plugins={[toc]}
                   />
+                <p>
+                  {link.tags?.map(t => <span key={t.name} className="badge bg-dark">{t.name}</span>)}
                 </p>
               </div>
             </div>
@@ -244,11 +248,14 @@ const LINK_QUERY = gql`
 `;
 
 const UPDATE_LINK = gql`
-  mutation UpdateLink($id: Int!, $url: String!, $description: String!) {
-    updateLink(id: $id, url: $url, description: $description) {
+  mutation UpdateLink($id: Int!, $url: String!, $description: String!, $tags: [String!]) {
+    updateLink(id: $id, url: $url, description: $description, tags: $tags) {
       id
       url
       description
+      tags {
+        name
+      }
     }
   }
 `;
@@ -261,6 +268,8 @@ const EditLink = () => {
 
   const [url, setUrl] = React.useState("");
   const [notes, setNotes] = React.useState("");
+  const [newTag, setNewTag] = React.useState("");
+  const [tags, setTags] = React.useState<string[]>([]);
 
   const history = useHistory();
 
@@ -272,10 +281,31 @@ const EditLink = () => {
   }, [data]);
 
   const saveChanges = () => {
-    updateLink({ variables: { id: Number.parseInt(id), url: url, description: notes } }).then(() => {
+    updateLink({ variables: { id: Number.parseInt(id), url: url, description: notes, tags: tags } }).then(() => {
       history.replace("/links");
     });
   };
+
+  const addNewTag = () => {
+    if (newTag.length > 0) {
+      const newTags = tags;
+      newTags.push(newTag)
+      setTags(newTags);
+      setNewTag("");
+    }
+  }
+
+  const removeTag = (tag: string) => {
+    const newTags = [...tags];
+
+    const idx = newTags.indexOf(tag);
+
+    if (idx >= 0) {
+      newTags.splice(idx, 1);
+    }
+
+    setTags(newTags);
+  }
 
   if (loading) return <p>Loading ...</p>;
   if (error) return <p>Error ...</p>;
@@ -294,6 +324,18 @@ const EditLink = () => {
           id="form"
           className="form-control"
         />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="tags" className="form-label">Tags</label>
+        <input type="text"
+         value={newTag}
+         onChange={(event) => { setNewTag(event.target.value) }}
+         name="newTag"
+         id="new-tag"
+         className="form-control"
+         onKeyPress={(event) => { if (event.charCode === 13) addNewTag(); }}
+       />
+       {tags.map((t, idx) => <span key={idx}>{t} - <button onClick={() => { removeTag(t); } }>x</button></span>)}
       </div>
       <div className="mb-3">
         <div className="row">
@@ -444,9 +486,8 @@ export const App = () => {
 
   return (
     <Router>
-      <div>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <div className="container-fluid">
+        <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
+          <div className="container">
             <a className="navbar-brand" href="/">
               Navbar
             </a>
@@ -496,7 +537,7 @@ export const App = () => {
           </div>
         </nav>
 
-        <div className="container">
+        <div id="main-content" className="container">
           <Switch>
             <Route path="/login">
               <Login setIsAuthenticated={setIsAuthenticated} />
@@ -516,7 +557,6 @@ export const App = () => {
           </Switch>
 
         </div>
-      </div>
     </Router>
   );
 };
