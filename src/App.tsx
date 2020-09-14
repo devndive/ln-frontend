@@ -216,15 +216,15 @@ const Links = () => {
                 }
               </div>
               <div className="col-sm-8">
-                  <p>Notes: <Link to={`/links/${link.id}/edit`}>edit</Link></p>
-                  <ReactMarkdown
-                    className="result"
-                    source={link.description}
-                    skipHtml={false}
-                    escapeHtml={false}
-                    // renderers={{code: CodeBlock}}
-                    plugins={[toc]}
-                  />
+                <p>Notes: <Link to={`/links/${link.id}/edit`}>edit</Link></p>
+                <ReactMarkdown
+                  className="result"
+                  source={link.description}
+                  skipHtml={false}
+                  escapeHtml={false}
+                  // renderers={{code: CodeBlock}}
+                  plugins={[toc]}
+                />
                 <p>
                   {link.tags?.map(t => <span key={t.name} className="badge bg-dark">{t.name}</span>)}
                 </p>
@@ -261,7 +261,7 @@ const UPDATE_LINK = gql`
 `;
 
 const EditLink = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const { loading, error, data } = useQuery(LINK_QUERY, { variables: { id: Number.parseInt(id) } });
 
   const [updateLink] = useMutation(UPDATE_LINK);
@@ -328,21 +328,21 @@ const EditLink = () => {
       <div className="mb-3">
         <label htmlFor="tags" className="form-label">Tags</label>
         <input type="text"
-         value={newTag}
-         onChange={(event) => { setNewTag(event.target.value) }}
-         name="newTag"
-         id="new-tag"
-         className="form-control"
-         onKeyPress={(event) => { if (event.charCode === 13) addNewTag(); }}
-       />
-       {tags.map((t, idx) => <span key={idx}>{t} - <button onClick={() => { removeTag(t); } }>x</button></span>)}
+          value={newTag}
+          onChange={(event) => { setNewTag(event.target.value) }}
+          name="newTag"
+          id="new-tag"
+          className="form-control"
+          onKeyPress={(event) => { if (event.charCode === 13) addNewTag(); }}
+        />
+        {tags.map((t, idx) => <span key={idx}>{t} - <button onClick={() => { removeTag(t); }}>x</button></span>)}
       </div>
       <div className="mb-3">
         <div className="row">
           <div className="col">
             <label htmlFor="url" className="form-label">
               Notes
-        </label>
+            </label>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
@@ -356,16 +356,15 @@ const EditLink = () => {
           <div className="col">
             <label className="form-label">
               &nbsp;
-        </label>
+            </label>
+
             <ReactMarkdown
               className="result"
               source={notes}
               skipHtml={false}
               escapeHtml={false}
-              // renderers={{code: CodeBlock}}
               plugins={[toc]}
             />
-
           </div>
         </div>
       </div>
@@ -436,15 +435,14 @@ const CreateLink = () => {
             <label className="form-label">
               &nbsp;
             </label>
+
             <ReactMarkdown
               className="result"
               source={notes}
               skipHtml={false}
               escapeHtml={false}
-              // renderers={{code: CodeBlock}}
               plugins={[toc]}
             />
-
           </div>
         </div>
       </div>
@@ -486,77 +484,77 @@ export const App = () => {
 
   return (
     <Router>
-        <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
-          <div className="container">
-            <a className="navbar-brand" href="/">
-              Navbar
+      <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div className="container">
+          <a className="navbar-brand" href="/">
+            Navbar
             </a>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-toggle="collapse"
-              data-target="#navbarSupportedContent"
-              aria-controls="navbarSupportedContent"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
 
-            <div className="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul className="navbar-nav mr-auto mb-2 mb-lg-0">
-                <li className="nav-item">
-                  <Link className="nav-link" to="/links">
-                    Links
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul className="navbar-nav mr-auto mb-2 mb-lg-0">
+              <li className="nav-item">
+                <Link className="nav-link" to="/links">
+                  Links
                   </Link>
-                </li>
+              </li>
 
-                <li className="nav-item">
-                  <Link className="nav-link" to="/links/create">
-                    Add link
+              <li className="nav-item">
+                <Link className="nav-link" to="/links/create">
+                  Add link
                   </Link>
-                </li>
+              </li>
 
-                <li className="nav-item">
-                  <Link className="nav-link" to="/">
-                    Home
+              <li className="nav-item">
+                <Link className="nav-link" to="/">
+                  Home
                   </Link>
-                </li>
-              </ul>
+              </li>
+            </ul>
 
-              <div className="d-flex">
-                {isAuthenticated ? (
-                  <SignOutButton setIsAuthenticated={setIsAuthenticated} />
-                ) : (
-                    <Link className="btn btn-outline-light" to="/login">
-                      Login
-                    </Link>
-                  )}
-              </div>
+            <div className="d-flex">
+              {isAuthenticated ? (
+                <SignOutButton setIsAuthenticated={setIsAuthenticated} />
+              ) : (
+                  <Link className="btn btn-outline-light" to="/login">
+                    Login
+                  </Link>
+                )}
             </div>
           </div>
-        </nav>
-
-        <div id="main-content" className="container">
-          <Switch>
-            <Route path="/login">
-              <Login setIsAuthenticated={setIsAuthenticated} />
-            </Route>
-            <PrivateRoute isAuthenticated={isAuthenticated} path="/links/create">
-              <CreateLink />
-            </PrivateRoute>
-            <PrivateRoute isAuthenticated={isAuthenticated} path="/links/:id/edit">
-              <EditLink />
-            </PrivateRoute>
-            <PrivateRoute isAuthenticated={isAuthenticated} path="/links">
-              <Links />
-            </PrivateRoute>
-            <Route path="/">
-              <Home />
-            </Route>
-          </Switch>
-
         </div>
+      </nav>
+
+      <div id="main-content" className="container">
+        <Switch>
+          <Route path="/login">
+            <Login setIsAuthenticated={setIsAuthenticated} />
+          </Route>
+          <PrivateRoute isAuthenticated={isAuthenticated} path="/links/create">
+            <CreateLink />
+          </PrivateRoute>
+          <PrivateRoute isAuthenticated={isAuthenticated} path="/links/:id/edit">
+            <EditLink />
+          </PrivateRoute>
+          <PrivateRoute isAuthenticated={isAuthenticated} path="/links">
+            <Links />
+          </PrivateRoute>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
+
+      </div>
     </Router>
   );
 };
