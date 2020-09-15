@@ -29,13 +29,13 @@ const PrivateRoute: React.FC<PrivateRouteProps & RouteProps> = ({ children, isAu
         isAuthenticated ? (
           children
         ) : (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: { from: location },
-              }}
-            />
-          )
+          <Redirect
+            to={{
+              pathname: "/login",
+              state: { from: location },
+            }}
+          />
+        )
       }
     />
   );
@@ -149,6 +149,14 @@ const UPDATE_METADATA_MUTATION = gql`
   }
 `;
 
+const DELETE_LINK_MUTATION = gql`
+  mutation DeleteLink($linkId: Int!) {
+    removeLink(id: $linkId) {
+      id
+    }
+  }
+`;
+
 const Links = () => {
   const [links, setLinks] = React.useState([]);
 
@@ -159,15 +167,31 @@ const Links = () => {
     onError: () => {
       console.log("Do some error handling");
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const [updateMetaDataMutation] = useMutation(UPDATE_METADATA_MUTATION);
+  const [deleteLinkMutation] = useMutation(DELETE_LINK_MUTATION, {
+    update: (cache, { data: { removeLink } }) => {
+      cache.modify({
+        fields: {
+          links(existingLinks, { readField }) {
+            return existingLinks.filter((l: any) => readField("id", l) !== readField("id", removeLink));
+          },
+        },
+      });
+    },
+  });
 
   const updateMetadata = (linkId: number) => {
     updateMetaDataMutation({ variables: { linkId } })
-      .then(() => { console.log("All good") })
-      .catch((e) => { console.log("Error", e) });
-  }
+      .then(() => {
+        console.log("All good");
+      })
+      .catch((e) => {
+        console.log("Error", e);
+      });
+  };
 
   const humanizeTime = (time: number): string => {
     if (time < 0.5) {
@@ -180,9 +204,19 @@ const Links = () => {
     return `${Math.ceil(time)} minutes`;
   };
 
+  const deleteLink = (linkId: number) => {
+    deleteLinkMutation({ variables: { linkId } })
+      .then(() => {
+        console.log("Link deleted");
+      })
+      .catch((e) => {
+        console.log("Error", e);
+      });
+  };
+
   return (
     <div>
-      <h1 className="mb-5">Links</h1>
+      <h1 className="mb-4">Links</h1>
 
       {links.map(
         (
@@ -191,42 +225,65 @@ const Links = () => {
             url: string;
             description: string;
             metadata: { title: string; description: string; image: string; estimatedTimeToRead: number };
-            tags: { name: string; }[];
+            tags: { name: string }[];
           },
-          idx) => {
+          idx
+        ) => {
           return (
-            <div className="row mb-5" key={idx}>
-              <div className="col-sm-4">
-                {link.metadata ? <div className="card">
-                  <img src={link.metadata.image} className="card-img-top" alt="Card for article" />
-                  <div className="card-body">
-                    <h5 className="card-title">{link.metadata.title}</h5>
-                    <h6 className="card-subtitle mb-2 text-muted">{humanizeTime(link.metadata.estimatedTimeToRead)}</h6>
-                    <p className="card-text">{link.metadata.description}</p>
+            <div className="row mb-4 shadow " key={idx}>
+              <div className="col-sm-4 mt-3 mb-3 border-right">
+                {link.metadata ? (
+                  <div className="row">
+                    <div className="col-md-4">
+                      <img src={link.metadata.image} className="card-img-top" alt="Card for article" />
+                    </div>
+                    <div className="col-md-8">
+                      <h5 className="card-title">{link.metadata.title}</h5>
+                      <h6 className="card-subtitle mb-2 text-muted">
+                        {humanizeTime(link.metadata.estimatedTimeToRead)}
+                      </h6>
+                      <p className="card-text">{link.metadata.description}</p>
 
-                    <a href={link.url} target="_blank" rel="noreferrer" className="btn btn-primary">
-                      Go read
+                      <a href={link.url} target="_blank" rel="noreferrer" className="btn btn-primary">
+                        Go read
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p>No metadata</p>
+                    <button className="btn btn-primary" onClick={() => updateMetadata(link.id)}>
+                      Update metadata
+                    </button>
+                    <a href={link.url} target="_blank" rel="noreferrer">
+                      Check URL
                     </a>
                   </div>
-                </div> : (<div>
-                  <p>No metadata</p>
-                  <button className="btn btn-primary" onClick={() => updateMetadata(link.id)}>Update metadata</button>
-                  <a href={link.url} target="_blank" rel="noreferrer">Check URL</a>
-                </div>)
-                }
+                )}
               </div>
-              <div className="col-sm-8">
-                <p>Notes: <Link to={`/links/${link.id}/edit`}>edit</Link></p>
+              <div className="col-sm-8 mt-3 mb-3">
+                <div className="float-right">
+                  <Link className="btn btn-primary btn-sm mr-1" to={`/links/${link.id}/edit`}>
+                    edit
+                  </Link>
+                  <button className="btn btn-danger btn-sm" onClick={() => deleteLink(link.id)}>
+                    delete
+                  </button>
+                </div>
+                <p>Notes:</p>
                 <ReactMarkdown
                   className="result"
                   source={link.description}
                   skipHtml={false}
                   escapeHtml={false}
-                  // renderers={{code: CodeBlock}}
                   plugins={[toc]}
                 />
                 <p>
-                  {link.tags?.map(t => <span key={t.name} className="badge bg-dark">{t.name}</span>)}
+                  {link.tags?.map((t) => (
+                    <span key={t.name} className="badge bg-dark mr-1">
+                      {t.name}
+                    </span>
+                  ))}
                 </p>
               </div>
             </div>
@@ -289,11 +346,11 @@ const EditLink = () => {
   const addNewTag = () => {
     if (newTag.length > 0) {
       const newTags = tags;
-      newTags.push(newTag)
+      newTags.push(newTag);
       setTags(newTags);
       setNewTag("");
     }
-  }
+  };
 
   const removeTag = (tag: string) => {
     const newTags = [...tags];
@@ -305,7 +362,7 @@ const EditLink = () => {
     }
 
     setTags(newTags);
-  }
+  };
 
   if (loading) return <p>Loading ...</p>;
   if (error) return <p>Error ...</p>;
@@ -326,16 +383,34 @@ const EditLink = () => {
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="tags" className="form-label">Tags</label>
-        <input type="text"
+        <label htmlFor="tags" className="form-label">
+          Tags
+        </label>
+        <input
+          type="text"
           value={newTag}
-          onChange={(event) => { setNewTag(event.target.value) }}
+          onChange={(event) => {
+            setNewTag(event.target.value);
+          }}
           name="newTag"
           id="new-tag"
           className="form-control"
-          onKeyPress={(event) => { if (event.charCode === 13) addNewTag(); }}
+          onKeyPress={(event) => {
+            if (event.key === "Enter") addNewTag();
+          }}
         />
-        {tags.map((t, idx) => <span key={idx}>{t} - <button onClick={() => { removeTag(t); }}>x</button></span>)}
+        {tags.map((t, idx) => (
+          <span key={idx}>
+            {t} -{" "}
+            <button
+              onClick={() => {
+                removeTag(t);
+              }}
+            >
+              x
+            </button>
+          </span>
+        ))}
       </div>
       <div className="mb-3">
         <div className="row">
@@ -351,24 +426,14 @@ const EditLink = () => {
               className="form-control"
               rows={5}
             ></textarea>
-
           </div>
           <div className="col">
-            <label className="form-label">
-              &nbsp;
-            </label>
+            <label className="form-label">&nbsp;</label>
 
-            <ReactMarkdown
-              className="result"
-              source={notes}
-              skipHtml={false}
-              escapeHtml={false}
-              plugins={[toc]}
-            />
+            <ReactMarkdown className="result" source={notes} skipHtml={false} escapeHtml={false} plugins={[toc]} />
           </div>
         </div>
       </div>
-
 
       <button type="submit" className="btn btn-primary" onClick={() => saveChanges()}>
         Save changes
@@ -381,6 +446,18 @@ const CREATE_LINK = gql`
   mutation CreateLink($url: String!, $description: String!) {
     createLink(url: $url, description: $description) {
       id
+      url
+      description
+      metadata {
+        id
+        title
+        description
+        image
+        estimatedTimeToRead
+      }
+      tags {
+        name
+      }
     }
   }
 `;
@@ -394,11 +471,23 @@ const CreateLink = () => {
   const history = useHistory();
 
   const createLink = () => {
-    createLinkMutation({ variables: { url: url, description: notes } }).then(() => {
+    createLinkMutation({
+      variables: { url: url, description: notes },
+      update: async (cache, { data: newLink }) => {
+        const { links }: any = cache.readQuery({ query: LINKS_QUERY });
+        console.log(links);
+
+        cache.writeQuery({
+          query: LINKS_QUERY,
+          data: {
+            links: links.concat([newLink]),
+          },
+        });
+      },
+    }).then(() => {
       history.replace("/links");
     });
   };
-
 
   return (
     <>
@@ -429,20 +518,11 @@ const CreateLink = () => {
               className="form-control"
               rows={5}
             ></textarea>
-
           </div>
           <div className="col">
-            <label className="form-label">
-              &nbsp;
-            </label>
+            <label className="form-label">&nbsp;</label>
 
-            <ReactMarkdown
-              className="result"
-              source={notes}
-              skipHtml={false}
-              escapeHtml={false}
-              plugins={[toc]}
-            />
+            <ReactMarkdown className="result" source={notes} skipHtml={false} escapeHtml={false} plugins={[toc]} />
           </div>
         </div>
       </div>
@@ -488,7 +568,7 @@ export const App = () => {
         <div className="container">
           <a className="navbar-brand" href="/">
             Navbar
-            </a>
+          </a>
           <button
             className="navbar-toggler"
             type="button"
@@ -506,19 +586,19 @@ export const App = () => {
               <li className="nav-item">
                 <Link className="nav-link" to="/links">
                   Links
-                  </Link>
+                </Link>
               </li>
 
               <li className="nav-item">
                 <Link className="nav-link" to="/links/create">
                   Add link
-                  </Link>
+                </Link>
               </li>
 
               <li className="nav-item">
                 <Link className="nav-link" to="/">
                   Home
-                  </Link>
+                </Link>
               </li>
             </ul>
 
@@ -526,10 +606,10 @@ export const App = () => {
               {isAuthenticated ? (
                 <SignOutButton setIsAuthenticated={setIsAuthenticated} />
               ) : (
-                  <Link className="btn btn-outline-light" to="/login">
-                    Login
-                  </Link>
-                )}
+                <Link className="btn btn-outline-light" to="/login">
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -553,7 +633,6 @@ export const App = () => {
             <Home />
           </Route>
         </Switch>
-
       </div>
     </Router>
   );
