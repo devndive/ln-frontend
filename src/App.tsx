@@ -62,7 +62,7 @@ const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) =>
   const history = useHistory();
   const location = useLocation<{ from: { pathname: string } }>();
 
-  const { from } = location.state || { from: { pathname: "/" } };
+  const { from } = location.state || { from: { pathname: "/links" } };
   const performLogin = () => {
     setIsLoading(true);
     login({ variables: { email, password } })
@@ -163,9 +163,6 @@ const Links = () => {
   useQuery(LINKS_QUERY, {
     onCompleted: (data) => {
       setLinks(data.links);
-    },
-    onError: () => {
-      console.log("Do some error handling");
     },
     fetchPolicy: "cache-and-network",
   });
@@ -443,8 +440,8 @@ const EditLink = () => {
 };
 
 const CREATE_LINK = gql`
-  mutation CreateLink($url: String!, $description: String!) {
-    createLink(url: $url, description: $description) {
+  mutation CreateLink($url: String!, $description: String!, $tags: [String!]) {
+    createLink(url: $url, description: $description, tags: $tags) {
       id
       url
       description
@@ -467,15 +464,37 @@ const CreateLink = () => {
 
   const [url, setUrl] = React.useState("");
   const [notes, setNotes] = React.useState("");
+  const [newTag, setNewTag] = React.useState("");
+  const [tags, setTags] = React.useState<string[]>([]);
 
   const history = useHistory();
 
+  const addNewTag = () => {
+    if (newTag.length > 0) {
+      const newTags = tags;
+      newTags.push(newTag);
+      setTags(newTags);
+      setNewTag("");
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    const newTags = [...tags];
+
+    const idx = newTags.indexOf(tag);
+
+    if (idx >= 0) {
+      newTags.splice(idx, 1);
+    }
+
+    setTags(newTags);
+  };
+
   const createLink = () => {
     createLinkMutation({
-      variables: { url: url, description: notes },
+      variables: { url: url, description: notes, tags: tags },
       update: async (cache, { data: newLink }) => {
         const { links }: any = cache.readQuery({ query: LINKS_QUERY });
-        console.log(links);
 
         cache.writeQuery({
           query: LINKS_QUERY,
@@ -503,6 +522,36 @@ const CreateLink = () => {
           id="form"
           className="form-control"
         />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="tags" className="form-label">
+          Tags
+        </label>
+        <input
+          type="text"
+          value={newTag}
+          onChange={(event) => {
+            setNewTag(event.target.value);
+          }}
+          name="newTag"
+          id="new-tag"
+          className="form-control"
+          onKeyPress={(event) => {
+            if (event.key === "Enter") addNewTag();
+          }}
+        />
+        {tags.map((t, idx) => (
+          <span key={idx}>
+            {t} -{" "}
+            <button
+              onClick={() => {
+                removeTag(t);
+              }}
+            >
+              x
+            </button>
+          </span>
+        ))}
       </div>
       <div className="mb-3">
         <div className="row">
