@@ -6,7 +6,6 @@ import {
   Link,
   Redirect,
   RouteProps,
-  useLocation,
   useHistory,
   useParams,
 } from "react-router-dom";
@@ -14,6 +13,7 @@ import { gql, useMutation, useQuery, useApolloClient } from "@apollo/client";
 import ReactMarkdown from "react-markdown";
 import toc from "remark-toc";
 import { Home } from "./pages/Home";
+import { Login } from "./pages/Login";
 
 import "./index.scss";
 
@@ -41,86 +41,6 @@ const PrivateRoute: React.FC<PrivateRouteProps & RouteProps> = ({ children, isAu
   );
 };
 
-const LOGIN_MUTATION = gql`
-  mutation Login($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
-      token
-    }
-  }
-`;
-
-const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: boolean) => void }) => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-
-  const [isLoading, setIsLoading] = React.useState(false);
-
-  const [error, setError] = React.useState("");
-
-  const [login] = useMutation(LOGIN_MUTATION);
-
-  const history = useHistory();
-  const location = useLocation<{ from: { pathname: string } }>();
-
-  const { from } = location.state || { from: { pathname: "/links" } };
-  const performLogin = () => {
-    setIsLoading(true);
-    login({ variables: { email, password } })
-      .then((result) => {
-        window.localStorage.setItem("token", result.data.login.token);
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        setError("");
-
-        history.replace(from);
-      })
-      .catch((e) => {
-        if (e && e.message) {
-          setError(e.message);
-        } else {
-          setError("Unexpected error. Please try again");
-        }
-
-        setIsLoading(false);
-      });
-  };
-
-  return (
-    <div>
-      <h1>Login</h1>
-
-      <input
-        type="text"
-        name="email"
-        value={email}
-        onChange={(event) => {
-          setEmail(event.target.value);
-        }}
-      />
-      <input
-        type="password"
-        name="password"
-        value={password}
-        onChange={(event) => {
-          setPassword(event.target.value);
-        }}
-      />
-
-      {isLoading && <p>Loading ...</p>}
-      {error && <p>Error: {error}</p>}
-
-      <button
-        className="btn btn-primary"
-        onClick={() => {
-          performLogin();
-        }}
-      >
-        Login
-      </button>
-    </div>
-  );
-};
-
 const LINKS_QUERY = gql`
   query Links {
     links {
@@ -142,16 +62,16 @@ const LINKS_QUERY = gql`
 `;
 
 const UPDATE_METADATA_MUTATION = gql`
-  mutation UpdateMetadata($linkId: Int!) {
-    updateMetadata(linkId: $linkId) {
+  mutation UpdateMetadata($id: Int!) {
+    updateMetadata(id: $id) {
       id
     }
   }
 `;
 
 const DELETE_LINK_MUTATION = gql`
-  mutation DeleteLink($linkId: Int!) {
-    removeLink(id: $linkId) {
+  mutation DeleteLink($id: Int!) {
+    removeLink(id: $id) {
       id
     }
   }
@@ -180,8 +100,8 @@ const Links = () => {
     },
   });
 
-  const updateMetadata = (linkId: number) => {
-    updateMetaDataMutation({ variables: { linkId } })
+  const updateMetadata = (id: number) => {
+    updateMetaDataMutation({ variables: { id } })
       .then(() => {
         console.log("All good");
       })
@@ -201,8 +121,8 @@ const Links = () => {
     return `${Math.ceil(time)} minutes`;
   };
 
-  const deleteLink = (linkId: number) => {
-    deleteLinkMutation({ variables: { linkId } })
+  const deleteLink = (id: number) => {
+    deleteLinkMutation({ variables: { id } })
       .then(() => {
         console.log("Link deleted");
       })
