@@ -3,58 +3,14 @@ import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 
 import { App } from './App';
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, from } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
+import { ApolloProvider } from '@apollo/client';
+import { createApolloClient } from './createApolloClient';
 
-const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_BACKEND_URL,
-});
-
-
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('token');
-
-  return {
-    headers: {
-      ...headers,
-      authorization: token ?`Bearer ${token}` : "",
-    }
-  }
-});
-
-const errorLink = onError(({ graphQLErrors, networkError}) => {
-  if (graphQLErrors) {
-
-    const authError = graphQLErrors.find(e => e.message.includes("Not Authorized"));
-    if (authError) {
-      localStorage.removeItem('token');
-    }
-
-    graphQLErrors.map(({ message, locations, path }) => 
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
-    );
-  }
-
-  if (networkError) console.log(`[Network error]: ${networkError}`);
-});
-
-const link = from([
-  authLink,
-  errorLink,
-  httpLink,
-])
-
-const client = new ApolloClient({
-  link:  link,
-  cache: new InMemoryCache(),
-});
+const apolloClient = createApolloClient();
 
 ReactDOM.render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
+    <ApolloProvider client={apolloClient}>
       <App />
     </ApolloProvider>
   </React.StrictMode>,
