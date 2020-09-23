@@ -11,6 +11,10 @@ jobs:
       - checkout
 
       - run:
+          name: installing modules
+          command: CI=true npm install
+
+      - run:
           name: testing
           command: npm run test
 
