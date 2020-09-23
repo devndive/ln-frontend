@@ -7,44 +7,37 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   return {
     headers: {
       ...headers,
-      authorization: token ?`Bearer ${token}` : "",
-    }
-  }
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError}) => {
+const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
+    const authError = graphQLErrors.find((e) => e.message.includes("Not Authorized"));
 
-    const authError = graphQLErrors.find(e => e.message.includes("Not Authorized"));
     if (authError) {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
     }
 
-    graphQLErrors.map(({ message, locations, path }) => 
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
+    graphQLErrors.map(({ message, locations, path }) =>
+      console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
     );
   }
 
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
-const link = from([
-  authLink,
-  errorLink,
-  httpLink,
-])
+const link = from([authLink, errorLink, httpLink]);
 
 export const createApolloClient = () => {
-    return new ApolloClient({
-        link:  link,
-        cache: new InMemoryCache(),
-    });
-}
-
+  return new ApolloClient({
+    link: link,
+    cache: new InMemoryCache(),
+  });
+};

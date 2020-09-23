@@ -1,0 +1,46 @@
+version: 2.1
+orbs:
+  node: circleci/node@3.0.0
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:14.9.0@sha256:e82dd1499090de6550d1880c76cb2b36710f1f268f256287e3f3a6979cb57005
+
+    steps:
+      - checkout
+
+      - run:
+          name: testing
+          command: npm run test
+
+      - run:
+          name: building
+          command: npm run build
+
+      - persist_to_workspace:
+          root: ./build
+          paths:
+            - '*'
+
+  deploy:
+    executor: aws-cli/default
+
+    steps:
+      - aws-cli/setup
+      - attach_workspace:
+          at: ./build
+      - run: aws s3 sync --delete ./build s3://$S3_TARGET/
+
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
+      - deploy:
+          required:
+            - build
+          filters:
+            branches:
+              only: main
