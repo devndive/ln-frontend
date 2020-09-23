@@ -2,8 +2,8 @@ import React from "react";
 
 import { Login, LOGIN_MUTATION } from "../pages/Login";
 
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { MockedProvider } from "@apollo/client/testing";
 import { MemoryRouter, Router } from "react-router-dom";
 import { createMemoryHistory } from "history";
@@ -77,9 +77,10 @@ describe("LoginComponent", () => {
           },
         },
         result: () => {
-          return { 
-              errors: [new GraphQLError("Login failed")],
-              data: { login: null } };
+          return {
+            errors: [new GraphQLError("Login failed")],
+            data: { login: null },
+          };
         },
       },
     ];
