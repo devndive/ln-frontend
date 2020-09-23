@@ -17,6 +17,7 @@ import { CreateLink } from "./pages/LinkCreate";
 import { EditLink } from "./pages/LinkEdit";
 
 import "./index.scss";
+import { LinksByTag } from "./pages/LinksByTag";
 
 interface PrivateRouteProps {
   isAuthenticated: boolean;
@@ -144,6 +145,9 @@ export const App = () => {
           </PrivateRoute>
           <PrivateRoute isAuthenticated={isAuthenticated} path="/links">
             <Links />
+          </PrivateRoute>
+          <PrivateRoute isAuthenticated={isAuthenticated} path="/tags/:tag">
+            <LinksByTag />
           </PrivateRoute>
           <Route path="/">
             <Home />

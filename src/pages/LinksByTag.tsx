@@ -1,12 +1,12 @@
 import { useQuery, useMutation, gql } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import toc from "remark-toc";
 
 export const LINKS_QUERY = gql`
-  query Links {
-    links {
+  query Links($tag: String) {
+    links(tag: $tag) {
       id
       url
       description
@@ -40,10 +40,14 @@ const DELETE_LINK_MUTATION = gql`
   }
 `;
 
-export const Links = () => {
+export const LinksByTag = () => {
+  const { tag } = useParams<{ tag: string }>();
   const [links, setLinks] = React.useState([]);
 
   useQuery(LINKS_QUERY, {
+    variables: {
+      tag,
+    },
     onCompleted: (data) => {
       setLinks(data.links);
     },
@@ -176,11 +180,9 @@ export const Links = () => {
                 />
                 <p>
                   {link.tags?.map((t) => (
-                    <a href={`/tags/${t.name}`}>
-                      <span key={t.name} className="badge bg-dark mr-1">
-                        {t.name}
-                      </span>
-                    </a>
+                    <span key={t.name} className="badge bg-dark mr-1">
+                      {t.name}
+                    </span>
                   ))}
                 </p>
               </div>
