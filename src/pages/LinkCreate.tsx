@@ -3,7 +3,7 @@ import { gql, useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useHistory } from "react-router-dom";
-import { LINKS_QUERY } from "./Links";
+import { LINKS_QUERY } from "./gql";
 
 const CREATE_LINK = gql`
   mutation CreateLink($url: String!, $description: String!, $tags: [String!]) {
