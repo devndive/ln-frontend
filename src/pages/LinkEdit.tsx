@@ -1,31 +1,9 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import React, { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, useHistory } from "react-router-dom";
 import toc from "remark-toc";
-
-const LINK_QUERY = gql`
-  query Link($id: Int!) {
-    link(id: $id) {
-      id
-      url
-      description
-    }
-  }
-`;
-
-const UPDATE_LINK = gql`
-  mutation UpdateLink($id: Int!, $url: String!, $description: String!, $tags: [String!]) {
-    updateLink(id: $id, url: $url, description: $description, tags: $tags) {
-      id
-      url
-      description
-      tags {
-        name
-      }
-    }
-  }
-`;
+import { LINK_QUERY, UPDATE_LINK } from "./gql";
 
 export const EditLink = () => {
   const { id } = useParams<{ id: string }>();
