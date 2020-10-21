@@ -1,29 +1,11 @@
 import toc from "remark-toc";
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useHistory } from "react-router-dom";
-import { LINKS_QUERY } from "./gql";
-
-const CREATE_LINK = gql`
-  mutation CreateLink($url: String!, $description: String!, $tags: [String!]) {
-    createLink(url: $url, description: $description, tags: $tags) {
-      id
-      url
-      description
-      metadata {
-        id
-        title
-        description
-        image
-        estimatedTimeToRead
-      }
-      tags {
-        name
-      }
-    }
-  }
-`;
+import { CREATE_LINK, LINKS_QUERY } from "./gql";
+import { useFieldArray, useForm } from "react-hook-form";
+import classnames from 'classnames';
 
 const NOTES_GUIDE = `What are the key ideas?\n
 How can I apply this knowledge that I learned?\n
@@ -32,39 +14,32 @@ How do these ideas relate to what I already know?`;
 export const CreateLink = () => {
   const [createLinkMutation] = useMutation(CREATE_LINK);
 
-  const [url, setUrl] = React.useState("");
-  const [notes, setNotes] = React.useState(NOTES_GUIDE);
   const [newTag, setNewTag] = React.useState("");
-  const [tags, setTags] = React.useState<string[]>([]);
+
+  const { register, getValues, control, errors, handleSubmit } = useForm();
+
+  const { fields, remove, append } = useFieldArray({
+    control,
+    name: "tags",
+  });
 
   const history = useHistory();
 
   const addNewTag = () => {
     if (newTag.length > 0) {
-      const newTags = tags;
-      newTags.push(newTag);
-      setTags(newTags);
-      setNewTag("");
+      append({ name: newTag });
     }
   };
 
-  const removeTag = (tag: string) => {
-    const newTags = [...tags];
-
-    const idx = newTags.indexOf(tag);
-
-    if (idx >= 0) {
-      newTags.splice(idx, 1);
-    }
-
-    setTags(newTags);
-  };
-
-  const createLink = () => {
+  const createLink = ({ url, notes }: { url: string, notes: string}) => {
     createLinkMutation({
-      variables: { url: url, description: notes, tags: tags },
+      variables: {
+        url,
+        description: notes,
+        tags: fields.map((f) => f.name),
+      },
       update: async (cache, { data: newLink }) => {
-        const { links }: any = cache.readQuery({ query: LINKS_QUERY });
+        const { links = [] }: any = cache.readQuery({ query: LINKS_QUERY });
 
         cache.writeQuery({
           query: LINKS_QUERY,
@@ -78,20 +53,27 @@ export const CreateLink = () => {
     });
   };
 
+  const getNotesOrDefault = (): string => {
+    const notesValue = getValues("notes");
+
+    if (notesValue !== "") {
+      return NOTES_GUIDE;
+    }
+
+    return notesValue + "";
+  };
+
   return (
-    <>
+    <form onSubmit={handleSubmit(createLink)}>
       <div className="mb-3">
         <label htmlFor="url" className="form-label">
           Url
         </label>
-        <input
-          type="text"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          name="url"
-          id="form"
-          className="form-control"
+        <input type="text" name="url" ref={register({ required: true })}
+ 
+            className={classnames("form-control", { "is-invalid": errors.url })}
         />
+        {errors.url && <div className=" invalid-feedback ">Please provide a url</div> }
       </div>
       <div className="mb-3">
         <label htmlFor="tags" className="form-label">
@@ -107,15 +89,18 @@ export const CreateLink = () => {
           id="new-tag"
           className="form-control"
           onKeyPress={(event) => {
-            if (event.key === "Enter") addNewTag();
+            if (event.key === "Enter") {
+              addNewTag();
+              setNewTag("");
+            }
           }}
         />
-        {tags.map((t, idx) => (
-          <span key={idx}>
-            {t} -{" "}
+        {fields.map((t, idx) => (
+          <span key={t.name}>
+            {t.name} -{" "}
             <button
               onClick={() => {
-                removeTag(t);
+                remove(idx);
               }}
             >
               x
@@ -130,8 +115,7 @@ export const CreateLink = () => {
               Notes
             </label>
             <textarea
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
+              ref={register}
               name="notes"
               id="notes"
               className="form-control"
@@ -143,7 +127,7 @@ export const CreateLink = () => {
 
             <ReactMarkdown
               className="result"
-              source={notes}
+              source={getNotesOrDefault()}
               skipHtml={false}
               escapeHtml={false}
               plugins={[toc]}
@@ -152,9 +136,9 @@ export const CreateLink = () => {
         </div>
       </div>
 
-      <button type="submit" className="btn btn-primary" onClick={() => createLink()}>
+      <button type="submit" className="btn btn-primary">
         Save
       </button>
-    </>
+    </form>
   );
 };
