@@ -1,39 +1,44 @@
+import React from "react";
 import { useQuery, useMutation } from "@apollo/client";
-import React, { useEffect } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 import { useParams, useHistory } from "react-router-dom";
 import toc from "remark-toc";
 import { LINK_QUERY, UPDATE_LINK } from "./gql";
+import classnames from 'classnames';
 
 export const EditLink = () => {
   const { id } = useParams<{ id: string }>();
   const { loading, error, data } = useQuery(LINK_QUERY, {
     variables: { id: Number.parseInt(id) },
+    onCompleted: (data) => {
+      if (data && data.link) {
+        setValue("url", data.link.url);
+        setValue("notes", data.link.description);
+        data.link.tags.forEach((t: any) =>  {
+          append({ name: t.name });
+        });
+      }
+    }
   });
 
   const [updateLink] = useMutation(UPDATE_LINK);
+  const { register, getValues, setValue, errors, control, handleSubmit } = useForm();
+  const { fields, remove, append } = useFieldArray({
+    control, name: "tags"
+  })
 
-  const [url, setUrl] = React.useState("");
-  const [notes, setNotes] = React.useState("");
   const [newTag, setNewTag] = React.useState("");
-  const [tags, setTags] = React.useState<string[]>([]);
 
   const history = useHistory();
 
-  useEffect(() => {
-    if (data && data.link) {
-      setUrl(data.link.url);
-      setNotes(data.link.description);
-    }
-  }, [data]);
-
-  const saveChanges = () => {
+  const saveChanges = ({ url, notes }: { url: string, notes: string }) => {
     updateLink({
       variables: {
         id: Number.parseInt(id),
-        url: url,
+        url,
         description: notes,
-        tags: tags,
+        tags: fields.map((f) => f.name),
       },
     }).then(() => {
       history.replace("/links");
@@ -42,42 +47,27 @@ export const EditLink = () => {
 
   const addNewTag = () => {
     if (newTag.length > 0) {
-      const newTags = tags;
-      newTags.push(newTag);
-      setTags(newTags);
-      setNewTag("");
+      append({ name: newTag })
     }
-  };
-
-  const removeTag = (tag: string) => {
-    const newTags = [...tags];
-
-    const idx = newTags.indexOf(tag);
-
-    if (idx >= 0) {
-      newTags.splice(idx, 1);
-    }
-
-    setTags(newTags);
   };
 
   if (loading) return <p>Loading ...</p>;
   if (error) return <p>Error ...</p>;
 
   return (
-    <>
+    <form onSubmit={handleSubmit(saveChanges)}>
       <div className="mb-3">
         <label htmlFor="url" className="form-label">
           Url
         </label>
         <input
           type="text"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
           name="url"
-          id="form"
-          className="form-control"
+          id="url"
+          ref={register({ required: true })}
+            className={classnames("form-control", { "is-invalid": errors.url })}
         />
+        {errors.url && <div className=" invalid-feedback ">Please provide a url</div> }
       </div>
       <div className="mb-3">
         <label htmlFor="tags" className="form-label">
@@ -93,19 +83,13 @@ export const EditLink = () => {
           id="new-tag"
           className="form-control"
           onKeyPress={(event) => {
-            if (event.key === "Enter") addNewTag();
+            if (event.key === "Enter") { addNewTag(); setNewTag(""); };
           }}
         />
-        {tags.map((t, idx) => (
-          <span key={idx}>
-            {t} -{" "}
-            <button
-              onClick={() => {
-                removeTag(t);
-              }}
-            >
-              x
-            </button>
+        {fields.map((t, idx) => (
+          <span key={t.name}>
+            {t.name} -{" "}
+            <button onClick={() => { remove(idx); }}>x</button>
           </span>
         ))}
       </div>
@@ -116,10 +100,8 @@ export const EditLink = () => {
               Notes
             </label>
             <textarea
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
               name="notes"
-              id="notes"
+              ref={register}
               className="form-control"
               rows={5}
             ></textarea>
@@ -129,7 +111,7 @@ export const EditLink = () => {
 
             <ReactMarkdown
               className="result"
-              source={notes}
+              source={getValues("notes")}
               skipHtml={false}
               escapeHtml={false}
               plugins={[toc]}
@@ -138,9 +120,9 @@ export const EditLink = () => {
         </div>
       </div>
 
-      <button type="submit" className="btn btn-primary" onClick={() => saveChanges()}>
+      <button type="submit" className="btn btn-primary">
         Save changes
       </button>
-    </>
+    </form>
   );
 };

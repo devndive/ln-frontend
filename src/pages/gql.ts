@@ -42,6 +42,30 @@ export const LINK_QUERY = gql`
       id
       url
       description
+      tags {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const CREATE_LINK = gql`
+  mutation CreateLink($url: String!, $description: String!, $tags: [String!]) {
+    createLink(url: $url, description: $description, tags: $tags) {
+      id
+      url
+      description
+      metadata {
+        id
+        title
+        description
+        image
+        estimatedTimeToRead
+      }
+      tags {
+        name
+      }
     }
   }
 `;

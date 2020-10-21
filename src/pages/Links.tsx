@@ -1,8 +1,8 @@
-import { useQuery } from "@apollo/client";
 import React from "react";
+
+import { useQuery } from "@apollo/client";
 import { LINKS_QUERY } from "./gql";
 import { ListOfLinks } from "./ListOfLinks";
-
 
 export const Links = () => {
   const [links, setLinks] = React.useState([]);
