@@ -112,9 +112,9 @@ export const EditLink = () => {
             <ReactMarkdown
               className="result"
               source={getValues("notes")}
-              skipHtml={false}
               escapeHtml={false}
               plugins={[toc]}
+              disallowedTypes={[]}
             />
           </div>
         </div>

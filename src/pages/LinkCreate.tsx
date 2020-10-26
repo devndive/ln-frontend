@@ -13,10 +13,13 @@ How do these ideas relate to what I already know?`;
 
 export const CreateLink = () => {
   const [createLinkMutation] = useMutation(CREATE_LINK);
-
   const [newTag, setNewTag] = React.useState("");
 
-  const { register, getValues, control, errors, handleSubmit } = useForm();
+  const { register, getValues, errors, control, handleSubmit } = useForm({
+    defaultValues: {
+      url: "",
+    },
+  });
 
   const { fields, remove, append } = useFieldArray({
     control,
@@ -37,16 +40,6 @@ export const CreateLink = () => {
         url,
         description: notes,
         tags: fields.map((f) => f.name),
-      },
-      update: async (cache, { data: newLink }) => {
-        const { links = [] }: any = cache.readQuery({ query: LINKS_QUERY });
-
-        cache.writeQuery({
-          query: LINKS_QUERY,
-          data: {
-            links: links.concat([newLink]),
-          },
-        });
       },
     }).then(() => {
       history.replace("/links");
@@ -69,11 +62,13 @@ export const CreateLink = () => {
         <label htmlFor="url" className="form-label">
           Url
         </label>
-        <input type="text" name="url" ref={register({ required: true })}
- 
-            className={classnames("form-control", { "is-invalid": errors.url })}
+        <input
+          type="text"
+          name="url"
+          ref={register({ required: true })}
+          className={classnames("form-control", { "is-invalid": errors.url })}
         />
-        {errors.url && <div className=" invalid-feedback ">Please provide a url</div> }
+        {errors.url && <div className=" invalid-feedback ">Please provide a url</div>}
       </div>
       <div className="mb-3">
         <label htmlFor="tags" className="form-label">
@@ -89,7 +84,9 @@ export const CreateLink = () => {
           id="new-tag"
           className="form-control"
           onKeyPress={(event) => {
+
             if (event.key === "Enter") {
+              event.preventDefault();
               addNewTag();
               setNewTag("");
             }
@@ -128,9 +125,9 @@ export const CreateLink = () => {
             <ReactMarkdown
               className="result"
               source={getNotesOrDefault()}
-              skipHtml={false}
               escapeHtml={false}
               plugins={[toc]}
+              disallowedTypes={[]}
             />
           </div>
         </div>
