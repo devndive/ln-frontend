@@ -3,7 +3,7 @@ import { useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useHistory } from "react-router-dom";
-import { CREATE_LINK, LINKS_QUERY } from "./gql";
+import { CREATE_LINK } from "./gql";
 import { useFieldArray, useForm } from "react-hook-form";
 import classnames from 'classnames';
 
@@ -15,7 +15,7 @@ export const CreateLink = () => {
   const [createLinkMutation] = useMutation(CREATE_LINK);
   const [newTag, setNewTag] = React.useState("");
 
-  const { register, getValues, errors, control, handleSubmit } = useForm({
+  const { register, watch, errors, control, handleSubmit } = useForm({
     defaultValues: {
       url: "",
     },
@@ -34,7 +34,7 @@ export const CreateLink = () => {
     }
   };
 
-  const createLink = ({ url, notes }: { url: string, notes: string}) => {
+  const createLink = ({ url, notes }: { url: string; notes: string }) => {
     createLinkMutation({
       variables: {
         url,
@@ -44,16 +44,6 @@ export const CreateLink = () => {
     }).then(() => {
       history.replace("/links");
     });
-  };
-
-  const getNotesOrDefault = (): string => {
-    const notesValue = getValues("notes");
-
-    if (notesValue !== "") {
-      return NOTES_GUIDE;
-    }
-
-    return notesValue + "";
   };
 
   return (
@@ -84,6 +74,7 @@ export const CreateLink = () => {
           id="new-tag"
           className="form-control"
           onKeyPress={(event) => {
+
 
             if (event.key === "Enter") {
               event.preventDefault();
@@ -124,7 +115,7 @@ export const CreateLink = () => {
 
             <ReactMarkdown
               className="result"
-              source={getNotesOrDefault()}
+              source={watch("notes", NOTES_GUIDE)}
               escapeHtml={false}
               plugins={[toc]}
               disallowedTypes={[]}
