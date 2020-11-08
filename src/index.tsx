@@ -2,17 +2,25 @@ import React from "react";
 import ReactDOM from "react-dom";
 import reportWebVitals from "./reportWebVitals";
 
-import { App } from "./App";
-import { ApolloProvider } from "@apollo/client";
-import { createApolloClient } from "./createApolloClient";
+import { ReactQueryDevtools } from "react-query-devtools";
 
-const apolloClient = createApolloClient();
+import { App } from "./App";
+import { AuthorizedApolloProvider } from "./AuthorizedApolloProvider";
+import { AuthProvider } from "./AuthProvider";
+import { UserProvider } from "./UserProvider";
+
+const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
 ReactDOM.render(
   <React.StrictMode>
-    <ApolloProvider client={apolloClient}>
-      <App />
-    </ApolloProvider>
+    <AuthProvider>
+      <UserProvider>
+        <AuthorizedApolloProvider>
+          <App />
+        </AuthorizedApolloProvider>
+      </UserProvider>
+    </AuthProvider>
+    { isDevelopmentMode ? <ReactQueryDevtools initialIsOpen /> : null }
   </React.StrictMode>,
   document.getElementById("root")
 );
