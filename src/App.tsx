@@ -9,8 +9,11 @@ import {
   useHistory,
 } from "react-router-dom";
 import { useApolloClient } from "@apollo/client";
+import { Dialog } from "@reach/dialog";
+import VisuallyHidden from "@reach/visually-hidden";
 
-import { Login } from "./pages/Login";
+import "@reach/dialog/styles.css";
+
 import { Home } from "./pages/Home";
 import { Links } from "./pages/Links";
 import { CreateLink } from "./pages/LinkCreate";
@@ -18,6 +21,17 @@ import { EditLink } from "./pages/LinkEdit";
 
 import "./index.scss";
 import { LinksByTag } from "./pages/LinksByTag";
+
+import Amplify, { Auth } from 'aws-amplify';
+import { ErrorMessage, FormGroup } from "./components";
+
+Amplify.configure({
+  Auth: {
+    region: 'eu-central-1',
+    userPoolId: 'eu-central-1_txOTeKTCs',
+    userPoolWebClientId: 'c04drplrotvoads04rh6ci9ck'
+  }
+});
 
 interface PrivateRouteProps {
   isAuthenticated: boolean;
@@ -71,16 +85,98 @@ const SignOutButton = ({
   );
 };
 
-export const App = () => {
-  const token = () => {
-    const t = window.localStorage.getItem("token");
-    return t ? true : false;
-  };
+const getUser = async () => {
+  const user = await Auth.currentAuthenticatedUser();
 
-  const [isAuthenticated, setIsAuthenticated] = React.useState(token);
+  return user;
+}
+
+export const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [status, setStatus] = React.useState("none");
+
+  const [dialog, setDialog] = React.useState("none");
+
+  const loginWithPopup = () => { 
+    console.log("login got called");
+    setDialog('login');
+  }
+
+  const logout = () => { 
+    console.log("logout got called")
+    Auth.signOut();
+  }
+
+  const close = () => { setDialog("none") }
+
+  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setStatus("none");
+
+    // @ts-ignore
+    const { email, password } = event.target.elements;
+
+    Auth.signIn({
+      username: email.value,
+      password: password.value,
+    }).then((response: any) => {
+      close();
+      setIsAuthenticated(true)
+    }).catch((response) => {
+      console.log(response);
+      setError(response.message);
+      setStatus("error");
+      setIsAuthenticated(false);
+    })
+  }
+
+  React.useEffect(() => {
+    console.log("checking login state");
+
+    getUser().then((user) => {
+      console.log("user", user);
+
+      if (!user) {
+        return;
+      }
+
+      setIsAuthenticated(true);
+    }).catch(data => {
+      console.log("error checking login state", data);
+     
+      setIsAuthenticated(false);
+    })
+  }, [])
+
+  const isError = status === 'error';
 
   return (
     <Router>
+      <Dialog isOpen={dialog === 'login'} aria-label="Login form" onDismiss={close}>
+        <button className="close-button" onClick={close}>
+          <VisuallyHidden>Close</VisuallyHidden>
+          <span aria-hidden>x</span>
+        </button>
+
+        <form onSubmit={handleLogin}>
+          <FormGroup>
+            <label htmlFor="email" className="form-label">Email</label>
+            <input id="email" type="text" className="form-control" />
+          </FormGroup>
+
+          <FormGroup>
+            <label htmlFor="password" className="form-label">Password</label>
+            <input id="password" type="password" className="form-control" />
+          </FormGroup>
+
+          {isError ? <ErrorMessage>{error}</ErrorMessage> : null}
+
+          <button className="btn btn-primary" type="submit">Login</button>
+        </form>
+      </Dialog>
+
       <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
         <div className="container">
           <a className="navbar-brand" href="/">
@@ -121,11 +217,13 @@ export const App = () => {
 
             <div className="d-flex">
               {isAuthenticated ? (
-                <SignOutButton setIsAuthenticated={setIsAuthenticated} />
+                <button className="btn btn-outline-light" onClick={() => logout()}>
+                  Sign out
+                </button>
               ) : (
-                <Link className="btn btn-outline-light" to="/login">
-                  Login
-                </Link>
+                <button className="btn btn-outline-light" onClick={() => loginWithPopup()}>
+                  Sign in
+                </button>
               )}
             </div>
           </div>
@@ -134,9 +232,6 @@ export const App = () => {
 
       <div id="main-content" className="container">
         <Switch>
-          <Route path="/login">
-            <Login setIsAuthenticated={setIsAuthenticated} />
-          </Route>
           <PrivateRoute isAuthenticated={isAuthenticated} path="/links/create">
             <CreateLink />
           </PrivateRoute>
