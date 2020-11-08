@@ -47,9 +47,10 @@ const AuthProvider: React.FC = (props) => {
   );
 
   const login = ({ email, password }: LoginData): Promise<any> => {
-    return Auth.signIn({ username: email, password }).then((user) =>
-      setUser({ email: user.attributes.email, userId: user.attributes.sub })
-    );
+    return Auth.signIn({ username: email, password })
+      .then((user) =>
+        setUser({ email: user.attributes.email, userId: user.attributes.sub })
+      )
   };
 
   const register = ({ email, password }: RegistrationData): Promise<any> => {
@@ -67,11 +68,6 @@ const AuthProvider: React.FC = (props) => {
 
   if (isLoading) {
     return <div>Loading ...</div>;
-  }
-
-  if (error) {
-    console.log(error);
-    return <div>Something really bad happened</div>;
   }
 
   return <AuthContext.Provider value={{ user, login, logout, register }} {...props} />;
