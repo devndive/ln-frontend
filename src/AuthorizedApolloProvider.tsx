@@ -1,20 +1,14 @@
+import React from "react";
+
+import { ApolloProvider } from "@apollo/client";
 import { createHttpLink, from, ApolloClient, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 
+import { Auth } from "aws-amplify";
+
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_BACKEND_URL,
-});
-
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem("token");
-
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
 });
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -33,11 +27,29 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
-const link = from([authLink, errorLink, httpLink]);
+export const AuthorizedApolloProvider: React.FC = ({ children }) => {
+  const authLink = setContext(async (_, { headers }) => {
+    const user = await Auth.currentAuthenticatedUser();
 
-export const createApolloClient = () => {
-  return new ApolloClient({
+    if (user) {
+      const token = user.signInUserSession.idToken.jwtToken;
+
+      return {
+        headers: {
+          ...headers,
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      };
+    }
+  });
+
+  const link = from([authLink, errorLink, httpLink]);
+
+  const createApolloClient = new ApolloClient({
     link: link,
     cache: new InMemoryCache(),
+    connectToDevTools: true,
   });
+
+  return <ApolloProvider client={createApolloClient}>{children}</ApolloProvider>;
 };
