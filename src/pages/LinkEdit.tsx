@@ -6,15 +6,17 @@ import { useParams, useHistory } from "react-router-dom";
 import toc from "remark-toc";
 import { LINK_QUERY, UPDATE_LINK } from "./gql";
 import classnames from "classnames";
-import { Link_link } from "./__generated__/Link";
-import { stringify } from "querystring";
+import { Link, Link_link } from "./__generated__/Link";
+import { Tag } from "../components";
 
 interface OwnProps {
   link: Link_link;
 }
 
-export const EditLinkImpl: React.FC<OwnProps> = ({ link }) => {
+export const EditLinkImpl: React.FC<OwnProps> = () => {
   const { id } = useParams<{ id: string }>();
+  const history = useHistory();
+
   const { register, watch, reset, errors, control, handleSubmit } = useForm<{
     url: string;
     notes: string;
@@ -33,20 +35,27 @@ export const EditLinkImpl: React.FC<OwnProps> = ({ link }) => {
   });
 
   const [newTag, setNewTag] = React.useState("");
-  const [updateLink] = useMutation(UPDATE_LINK);
+  const [updateLink] = useMutation(UPDATE_LINK, {
+    onCompleted: () => {
+      history.replace("/links");
+    },
+  });
 
-  const history = useHistory();
-
-  React.useEffect(() => {
-    console.log(link.tags);
-    reset({
-      url: link.url,
-      notes: link.description,
-      tags: link.tags.map((t) => {
-        return { name: t.name };
-      }),
-    });
-  }, [reset, link]);
+  useQuery<Link>(LINK_QUERY, {
+    variables: { id: Number.parseInt(id) },
+    onCompleted: (data) => {
+      if (data && data.link) {
+        const { link } = data;
+        reset({
+          url: link.url,
+          notes: link.description,
+          tags: link.tags.map((t) => {
+            return { name: t.name };
+          }),
+        });
+      }
+    },
+  });
 
   const saveChanges = ({ url, notes }: { url: string; notes: string }) => {
     updateLink({
@@ -56,9 +65,7 @@ export const EditLinkImpl: React.FC<OwnProps> = ({ link }) => {
         description: notes,
         tags: fields.map((f) => f.name),
       },
-    }).then(() => {
-      history.replace("/links");
-    });
+    }).then(() => {});
   };
 
   const addNewTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -105,16 +112,7 @@ export const EditLinkImpl: React.FC<OwnProps> = ({ link }) => {
           }}
         />
         {fields.map((t, idx) => (
-          <span key={t.name}>
-            {t.name} -{" "}
-            <button
-              onClick={() => {
-                remove(idx);
-              }}
-            >
-              x
-            </button>
-          </span>
+          <Tag key={t.name} tag={t.name} removeButtonClicked={() => remove(idx)} />
         ))}
       </div>
       <div className="mb-3">
