@@ -11,3 +11,22 @@ export const ErrorMessage: React.FC = ({ children }) => {
     </div>
   );
 };
+
+interface TagProps {
+  tag: string;
+  removeButtonClicked: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+}
+
+export const Tag: React.FC<TagProps> = ({ tag, removeButtonClicked }: TagProps) => {
+  return (
+    <span className="badge bg-info mt-1 mr-1">
+      {tag}{" "}
+      <button
+        type="button"
+        className="btn-close"
+        aria-label="Remove tag"
+        onClick={removeButtonClicked}
+      ></button>
+    </span>
+  );
+};
