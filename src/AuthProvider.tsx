@@ -1,6 +1,7 @@
 import React from "react";
 import Amplify, { Auth } from "aws-amplify";
-import { useQuery } from "react-query";
+import { MutateFunction, useMutation, useQuery } from "react-query";
+import { Logger } from "./Logger";
 
 Amplify.configure({
   Auth: {
@@ -27,52 +28,61 @@ interface RegistrationData {
 
 interface AuthContextType {
   user: User;
-  login: (data: LoginData) => Promise<any>;
+  isAuthenticated: boolean;
+  signIn: MutateFunction<User, any, LoginData, unknown>;
   register: (data: RegistrationData) => Promise<any>;
   logout: () => void;
 }
 
-const AuthContext = React.createContext<AuthContextType>({
-  user: { email: "", userId: "" },
-  login: () => Promise.resolve(),
-  register: () => Promise.resolve(),
-  logout: () => {},
-});
+// @ts-ignore
+const AuthContext = React.createContext<AuthContextType>();
 
 const AuthProvider: React.FC = (props) => {
   const [user, setUser] = React.useState<User>({ email: "", userId: "" });
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+  const [signIn] = useMutation<
+    User,
+    any,
+    LoginData
+  >(({ email, password }) =>
+    Auth.signIn({ username: email, password }).then((user) => {
+      setIsAuthenticated(true);
+      return Promise.resolve({ email: user.attributes.email, userId: user.attributes.sub });
+    })
+  );
 
   const { isLoading, error, data } = useQuery("currentAuthenticatedUser", () =>
     Auth.currentAuthenticatedUser()
   );
-
-  const login = ({ email, password }: LoginData): Promise<any> => {
-    return Auth.signIn({ username: email, password })
-      .then((user) =>
-        setUser({ email: user.attributes.email, userId: user.attributes.sub })
-      )
-  };
 
   const register = ({ email, password }: RegistrationData): Promise<any> => {
     return Auth.signUp({ username: email, password });
   };
 
   const logout = (): void => {
+    setIsAuthenticated(false);
     Auth.signOut();
     window.location.assign(window.location.toString());
   };
 
   React.useEffect(() => {
-    setUser(data);
+    if (data) {
+      Logger.log("AuthProvider::useEffect with data", data);
+
+      setIsAuthenticated(true);
+      setUser(data);
+    }
+
   }, [data]);
 
   if (isLoading) {
     return <div>Loading ...</div>;
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, register }} {...props} />;
+  return <AuthContext.Provider value={{ user, isAuthenticated, signIn, logout, register }} {...props} />;
 };
 
-const useAuth = () => React.useContext(AuthContext);
+const useAuth = () => React.useContext<AuthContextType>(AuthContext);
 
 export { AuthProvider, useAuth };

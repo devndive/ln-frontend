@@ -6,23 +6,20 @@ import { ListOfLinks } from "./ListOfLinks";
 
 export const LinksByTag = () => {
   const { tag } = useParams<{ tag: string }>();
-  const [links, setLinks] = React.useState([]);
 
-  useQuery(LINKS_QUERY, {
-    variables: {
-      tag,
-    },
-    onCompleted: (data) => {
-      setLinks(data.links);
-    },
-    fetchPolicy: "cache-and-network",
+  const { data: links, loading } = useQuery(LINKS_QUERY, {
+    variables: { tag },
   });
+
+  if (loading) {
+    return <p>Loading ...</p>;
+  }
 
   return (
     <div>
       <h1 className="mb-4">Links</h1>
 
-      <ListOfLinks links={links} />
+      <ListOfLinks links={links.links} />
     </div>
   );
 };

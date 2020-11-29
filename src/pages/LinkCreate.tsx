@@ -6,6 +6,7 @@ import { useHistory } from "react-router-dom";
 import { CREATE_LINK } from "./gql";
 import { useFieldArray, useForm } from "react-hook-form";
 import classnames from 'classnames';
+import { Tag } from "../components";
 
 const NOTES_GUIDE = `What are the key ideas?\n
 How can I apply this knowledge that I learned?\n
@@ -15,9 +16,15 @@ export const CreateLink = () => {
   const [createLinkMutation] = useMutation(CREATE_LINK);
   const [newTag, setNewTag] = React.useState("");
 
-  const { register, watch, errors, control, handleSubmit } = useForm({
+  const { register, watch, errors, control, handleSubmit } = useForm<{
+    url: string;
+    notes: string;
+    tags: { name: string }[];
+  }>({
     defaultValues: {
       url: "",
+      notes: "",
+      tags: [],
     },
   });
 
@@ -74,8 +81,6 @@ export const CreateLink = () => {
           id="new-tag"
           className="form-control"
           onKeyPress={(event) => {
-
-
             if (event.key === "Enter") {
               event.preventDefault();
               addNewTag();
@@ -84,16 +89,7 @@ export const CreateLink = () => {
           }}
         />
         {fields.map((t, idx) => (
-          <span key={t.name}>
-            {t.name} -{" "}
-            <button
-              onClick={() => {
-                remove(idx);
-              }}
-            >
-              x
-            </button>
-          </span>
+          <Tag key={t.name} tag={t.name} removeButtonClicked={() => remove(idx)} />
         ))}
       </div>
       <div className="mb-3">
@@ -115,7 +111,7 @@ export const CreateLink = () => {
 
             <ReactMarkdown
               className="result"
-              source={watch("notes", NOTES_GUIDE)}
+              source={watch("notes", "")}
               escapeHtml={false}
               plugins={[toc]}
               disallowedTypes={[]}

@@ -4,6 +4,7 @@ import { gql, useMutation } from "@apollo/client";
 import { useHistory, useLocation } from "react-router-dom";
 import classnames from 'classnames';
 import { useForm } from 'react-hook-form';
+import { Logger } from "../Logger";
 
 export const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
@@ -38,7 +39,7 @@ export const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: bool
         history.replace(from);
       })
       .catch((e) => {
-        console.log(e);
+        Logger.error(e);
         if (e && e.message) {
           setError(e.message);
         } else {

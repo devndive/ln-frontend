@@ -5,20 +5,17 @@ import { LINKS_QUERY } from "./gql";
 import { ListOfLinks } from "./ListOfLinks";
 
 export const Links = () => {
-  const [links, setLinks] = React.useState([]);
+  const { data, loading } = useQuery(LINKS_QUERY);
 
-  useQuery(LINKS_QUERY, {
-    onCompleted: (data) => {
-      setLinks(data.links);
-    },
-    fetchPolicy: "cache-and-network",
-  });
+  if (loading) {
+    return <p>Loading</p>;
+  }
 
   return (
     <div>
       <h1 className="mb-4">Links</h1>
 
-      <ListOfLinks links={links} />
+      <ListOfLinks links={data.links} />
     </div>
   );
 };

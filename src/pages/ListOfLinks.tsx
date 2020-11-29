@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { UPDATE_METADATA_MUTATION, DELETE_LINK_MUTATION } from "./gql";
 import toc from "remark-toc";
 import { Links_links } from "./__generated__/Links";
+import { Logger } from "../Logger";
 
 const humanizeTime = (time: number | null): string => {
   if (time === null) {
@@ -42,23 +43,15 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
   });
 
   const updateMetadata = (id: number) => {
-    updateMetaDataMutation({ variables: { id } })
-      .then(() => {
-        console.log("All good");
-      })
-      .catch((e) => {
-        console.log("Error", e);
-      });
+    updateMetaDataMutation({ variables: { id } }).catch((e) => {
+      Logger.error("Error", e);
+    });
   };
 
   const deleteLink = (id: number) => {
-    deleteLinkMutation({ variables: { id } })
-      .then(() => {
-        console.log("Link deleted");
-      })
-      .catch((e) => {
-        console.log("Error", e);
-      });
+    deleteLinkMutation({ variables: { id } }).catch((e) => {
+      Logger.error("Error", e);
+    });
   };
 
   return (
@@ -72,6 +65,7 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
                   <div className="col-md-4">
                     {link.metadata.image && (
                       <img
+                        loading="lazy"
                         src={link.metadata.image}
                         className="card-img-top"
                         alt="Card for article"
@@ -121,11 +115,11 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
               />
               <p>
                 {link.tags?.map((t) => (
-                  <a href={`/tags/${t.name}`} key={t.name}>
+                  <Link to={`/tags/${t.name}`} key={t.name}>
                     <span key={t.name} className="badge bg-dark mr-1">
                       {t.name}
                     </span>
-                  </a>
+                  </Link>
                 ))}
               </p>
             </div>
