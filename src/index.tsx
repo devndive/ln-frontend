@@ -9,6 +9,16 @@ import { AuthorizedApolloProvider } from "./AuthorizedApolloProvider";
 import { AuthProvider } from "./AuthProvider";
 import { UserProvider } from "./UserProvider";
 
+import Amplify from "aws-amplify";
+
+Amplify.configure({
+  Auth: {
+    region: "eu-central-1",
+    userPoolId: "eu-central-1_txOTeKTCs",
+    userPoolWebClientId: "c04drplrotvoads04rh6ci9ck",
+  },
+});
+
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
 
 ReactDOM.render(

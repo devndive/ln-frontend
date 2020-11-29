@@ -6,6 +6,7 @@ import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 
 import { Auth } from "aws-amplify";
+import { Logger } from "./Logger";
 
 const httpLink = createHttpLink({
   uri: process.env.REACT_APP_BACKEND_URL,
@@ -20,11 +21,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     }
 
     graphQLErrors.map(({ message, locations, path }) =>
-      console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
+      Logger.error(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
     );
   }
 
-  if (networkError) console.log(`[Network error]: ${networkError}`);
+  if (networkError) Logger.error(`[Network error]: ${networkError}`);
 });
 
 export const AuthorizedApolloProvider: React.FC = ({ children }) => {
@@ -47,7 +48,35 @@ export const AuthorizedApolloProvider: React.FC = ({ children }) => {
 
   const createApolloClient = new ApolloClient({
     link: link,
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Tag: {
+          keyFields: ["name"],
+        },
+        Query: {
+          fields: {
+            link(_, { args, toReference }) {
+              return toReference({
+                __typename: "Link",
+                id: args?.id,
+              });
+            },
+            metadata(_, { args, toReference }) {
+              return toReference({
+                __typename: "Metadata",
+                id: args?.id,
+              });
+            },
+            tag(_, { args, toReference }) {
+              return toReference({
+                __typename: "Tag",
+                name: args?.name,
+              });
+            },
+          },
+        },
+      },
+    }),
     connectToDevTools: true,
   });
 
