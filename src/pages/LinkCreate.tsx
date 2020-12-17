@@ -1,5 +1,5 @@
 import toc from "remark-toc";
-import { useMutation } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useHistory } from "react-router-dom";
@@ -13,7 +13,38 @@ How can I apply this knowledge that I learned?\n
 How do these ideas relate to what I already know?`;
 
 export const CreateLink = () => {
-  const [createLinkMutation] = useMutation(CREATE_LINK);
+  const [createLinkMutation] = useMutation(CREATE_LINK, {
+    update(cache, { data: { addLink } }) {
+      cache.modify({
+        fields: {
+          links(existingLinks = []) {
+            const newLinkRef = cache.writeFragment({
+              data: addLink,
+              fragment: gql`
+                fragment NewLink on Link {
+                  id
+                  url
+                  description
+                  metadata {
+                    id
+                    title
+                    description
+                    image
+                    estimatedTimeToRead
+                  }
+                  tags {
+                    name
+                  }
+                }
+              `,
+            });
+
+            return [existingLinks, newLinkRef];
+          },
+        },
+      });
+    },
+  });
   const [newTag, setNewTag] = React.useState("");
 
   const { register, watch, errors, control, handleSubmit } = useForm<{
