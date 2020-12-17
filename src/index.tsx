@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import reportWebVitals from "./reportWebVitals";
 
+import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query-devtools";
 
 import { App } from "./App";
@@ -19,18 +20,28 @@ Amplify.configure({
   },
 });
 
-const isDevelopmentMode = process.env.NODE_ENV === 'development';
+const isDevelopmentMode = process.env.NODE_ENV === "development";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthProvider>
-      <UserProvider>
-        <AuthorizedApolloProvider>
-          <App />
-        </AuthorizedApolloProvider>
-      </UserProvider>
-    </AuthProvider>
-    { isDevelopmentMode ? <ReactQueryDevtools initialIsOpen /> : null }
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <UserProvider>
+          <AuthorizedApolloProvider>
+            <App />
+          </AuthorizedApolloProvider>
+        </UserProvider>
+      </AuthProvider>
+      {isDevelopmentMode ? <ReactQueryDevtools initialIsOpen /> : null}
+    </QueryClientProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
