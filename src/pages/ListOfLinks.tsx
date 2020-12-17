@@ -22,6 +22,14 @@ const humanizeTime = (time: number | null): string => {
   return `${Math.ceil(time)} minutes`;
 };
 
+const makeUrlSchemaAbsolute = (url: string): string => {
+  if (url.startsWith("http://")) {
+    return url.replace("http://", "//");
+  }
+
+  return url;
+};
+
 interface ListOfLinksProps {
   links: Links_links[];
 }
@@ -66,7 +74,7 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
                     {link.metadata.image && (
                       <img
                         loading="lazy"
-                        src={link.metadata.image}
+                        src={makeUrlSchemaAbsolute(link.metadata.image)}
                         className="card-img-top"
                         alt="Card for article"
                       />
@@ -116,7 +124,7 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
               <p>
                 {link.tags?.map((t) => (
                   <Link to={`/tags/${t.name}`} key={t.name}>
-                    <span key={t.name} className="badge bg-dark mr-1">
+                    <span key={t.name} className="badge bg-dark me-1">
                       {t.name}
                     </span>
                   </Link>

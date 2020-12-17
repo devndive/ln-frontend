@@ -1,6 +1,6 @@
 import React from "react";
 import Amplify, { Auth } from "aws-amplify";
-import { MutateFunction, useMutation, useQuery } from "react-query";
+import { UseMutateFunction, useMutation, useQuery } from "react-query";
 import { Logger } from "./Logger";
 
 Amplify.configure({
@@ -29,7 +29,7 @@ interface RegistrationData {
 interface AuthContextType {
   user: User;
   isAuthenticated: boolean;
-  signIn: MutateFunction<User, any, LoginData, unknown>;
+  signIn: UseMutateFunction<User, any, LoginData, unknown>;
   register: (data: RegistrationData) => Promise<any>;
   logout: () => void;
 }
@@ -41,11 +41,7 @@ const AuthProvider: React.FC = (props) => {
   const [user, setUser] = React.useState<User>({ email: "", userId: "" });
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
-  const [signIn] = useMutation<
-    User,
-    any,
-    LoginData
-  >(({ email, password }) =>
+  const { mutate: signIn } = useMutation<User, any, LoginData>(({ email, password }) =>
     Auth.signIn({ username: email, password }).then((user) => {
       setIsAuthenticated(true);
       return Promise.resolve({ email: user.attributes.email, userId: user.attributes.sub });
