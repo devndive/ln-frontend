@@ -56,9 +56,9 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
 
   return (
     <>
-      {links.map((link: Links_links, idx) => {
+      {links.map((link: Links_links) => {
         return (
-          <div className="row mb-4 shadow " key={idx}>
+          <div className="row mb-4 shadow " key={link.id}>
             <div className="col-sm-4 mt-3 mb-3 border-right">
               {link.metadata ? (
                 <div className="row">
@@ -97,8 +97,8 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
               )}
             </div>
             <div className="col-sm-8 mt-3 mb-3">
-              <div className="float-right">
-                <Link className="btn btn-primary btn-sm mr-1" to={`/links/${link.id}/edit`}>
+              <div className="float-end">
+                <Link className="btn btn-primary btn-sm me-1" to={`/links/${link.id}/edit`}>
                   edit
                 </Link>
                 <button className="btn btn-danger btn-sm" onClick={() => deleteLink(link.id)}>
