@@ -16,10 +16,6 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     const authError = graphQLErrors.find((e) => e.message.includes("Not Authorized"));
 
-    if (authError) {
-      localStorage.removeItem("token");
-    }
-
     graphQLErrors.map(({ message, locations, path }) =>
       Logger.error(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
     );
@@ -48,35 +44,7 @@ export const AuthorizedApolloProvider: React.FC = ({ children }) => {
 
   const createApolloClient = new ApolloClient({
     link: link,
-    cache: new InMemoryCache({
-      typePolicies: {
-        Tag: {
-          keyFields: ["name"],
-        },
-        Query: {
-          fields: {
-            link(_, { args, toReference }) {
-              return toReference({
-                __typename: "Link",
-                id: args?.id,
-              });
-            },
-            metadata(_, { args, toReference }) {
-              return toReference({
-                __typename: "Metadata",
-                id: args?.id,
-              });
-            },
-            tag(_, { args, toReference }) {
-              return toReference({
-                __typename: "Tag",
-                name: args?.name,
-              });
-            },
-          },
-        },
-      },
-    }),
+    cache: new InMemoryCache(),
     connectToDevTools: true,
   });
 
