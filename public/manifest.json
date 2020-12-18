@@ -1,25 +1,30 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+    "short_name": "Link's'Notes",
+    "name": "Keep notes with your links",
+    "icons": [
+        {
+            "src": "/book192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/book512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/",
+    "description": "A simple tool to keep track of links and notes with those links",
+    "display": "fullscreen",
+    "background_color": "#f0f5ff",
+    "share_target": {
+        "action": "/links/create",
+        "method": "GET",
+        "enctype": "application/x-www-form-urlencoded",
+        "params": {
+            "title": "title",
+            "text": "description",
+            "url": "url"
+        }
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
 }

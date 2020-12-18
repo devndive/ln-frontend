@@ -40,7 +40,6 @@ ReactDOM.render(
           </AuthorizedApolloProvider>
         </UserProvider>
       </AuthProvider>
-      {isDevelopmentMode ? <ReactQueryDevtools initialIsOpen /> : null}
     </QueryClientProvider>
   </React.StrictMode>,
   document.getElementById("root")
