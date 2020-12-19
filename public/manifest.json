@@ -1,6 +1,8 @@
 {
-    "short_name": "Link's'Notes",
     "name": "Keep notes with your links",
+    "short_name": "Link's'Notes",
+    "orientation": "portrait",
+    "display": "standalone",
     "icons": [
         {
             "src": "/book192.png",
@@ -13,9 +15,12 @@
             "sizes": "512x512"
         }
     ],
-    "start_url": "/",
+    "categories": [
+        "bookmarks",
+        "notes"
+    ],
+    "start_url": "/links",
     "description": "A simple tool to keep track of links and notes with those links",
-    "display": "fullscreen",
     "background_color": "#f0f5ff",
     "share_target": {
         "action": "/links/create",
