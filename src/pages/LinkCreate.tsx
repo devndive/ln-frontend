@@ -2,15 +2,35 @@ import toc from "remark-toc";
 import { gql, useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { CREATE_LINK } from "./gql";
 import { useFieldArray, useForm } from "react-hook-form";
-import classnames from 'classnames';
+import classnames from "classnames";
 import { Tag } from "../components";
 
 const NOTES_GUIDE = `What are the key ideas?\n
 How can I apply this knowledge that I learned?\n
 How do these ideas relate to what I already know?`;
+
+function useQueryParams() {
+  return new URLSearchParams(useLocation().search);
+}
+
+export function prefillNotes(title: string, description: string): string {
+  if (!title && !description) {
+    return "";
+  }
+
+  if (title && !description) {
+    return title;
+  }
+
+  if (!title && description) {
+    return description;
+  }
+
+  return [title, description].join("\n\n");
+}
 
 export const CreateLink = () => {
   const [createLinkMutation] = useMutation(CREATE_LINK, {
@@ -47,14 +67,19 @@ export const CreateLink = () => {
   });
   const [newTag, setNewTag] = React.useState("");
 
+  const params = useQueryParams();
+  console.log(params.get("title"));
+  console.log(params.get("description"));
+  console.log(params.get("url"));
+
   const { register, watch, errors, control, handleSubmit } = useForm<{
     url: string;
     notes: string;
     tags: { name: string }[];
   }>({
     defaultValues: {
-      url: "",
-      notes: "",
+      url: params.get("url") ?? "",
+      notes: prefillNotes(params.get("title") ?? "", params.get("description") ?? ""),
       tags: [],
     },
   });
