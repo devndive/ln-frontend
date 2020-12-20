@@ -85,6 +85,8 @@ export const AuthenticatedApp = () => {
           <Route path="/tags/:tag">
             <LinksByTag />
           </Route>
+
+          <Route path="/"></Route>
         </Switch>
       </div>
     </Router>

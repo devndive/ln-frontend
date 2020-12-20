@@ -12,6 +12,8 @@ import { UserProvider } from "./UserProvider";
 
 import Amplify from "aws-amplify";
 
+import * as ServiceWorkerRegistration from "./serviceWorkerRegistration";
+
 Amplify.configure({
   Auth: {
     region: "eu-central-1",
@@ -49,3 +51,5 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+ServiceWorkerRegistration.register();
