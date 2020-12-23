@@ -8,38 +8,83 @@ import { useFieldArray, useForm } from "react-hook-form";
 import classnames from "classnames";
 import { Tag } from "../components";
 
-const NOTES_GUIDE = `What are the key ideas?\n
-How can I apply this knowledge that I learned?\n
-How do these ideas relate to what I already know?`;
+/*
+ * All apps that use sharing do this differently. You have to guess in which field the url
+ * could be. Therefor I am testing the strings and try to guess which one could hold the url
+ * I want.
+ * 
+ * Sharing from chrome on android seems to put the url into the text field
+ * 
+ * Twitter APP on android puts the url in the title field
+ */
+export function mapFieldsFromShareTarget(params: URLSearchParams)
+: {
+  title: string,
+  text: string,
+  url: string
+} {
+  const returnValue = {
+    title: params.get("title") ?? "",
+    text: params.get("text") ?? "",
+    url: params.get("url") ?? ""
+  }
 
-function useQueryParams() {
-  return new URLSearchParams(useLocation().search);
+  // No URL was passed, so we try to find one in the other fields
+  if (!returnValue.url) {
+    if (stringIsValidUrl(returnValue.title)) {
+      returnValue.url = returnValue.title;
+      returnValue.title = "";
+    } else if (stringIsValidUrl(returnValue.text)) {
+      returnValue.url = returnValue.text;
+      returnValue.text = "";
+    }
+  }
+
+  return returnValue;
 }
 
-export function prefillNotes(title: string, description: string): string {
-  if (!title && !description) {
+function useQueryParams(): {
+  title: string,
+  text: string,
+  url: string
+} {
+  const params = new URLSearchParams(useLocation().search);
+  return mapFieldsFromShareTarget(params);
+}
+
+function stringIsValidUrl(stringToTest: string): boolean {
+  try {
+    new URL(stringToTest);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function prefillNotes(title: string, text: string): string {
+  if (!title && !text) {
     return "";
   }
 
-  if (title && !description) {
+  if (title && !text) {
     return title;
   }
 
-  if (!title && description) {
-    return description;
+  if (!title && text) {
+    return text;
   }
 
-  return [title, description].join("\n\n");
+  return [title, text].join("\n\n");
 }
 
 export const CreateLink = () => {
   const [createLinkMutation] = useMutation(CREATE_LINK, {
-    update(cache, { data: { addLink } }) {
+    update(cache, { data: { createLink } }) {
       cache.modify({
         fields: {
-          links(existingLinks = []) {
-            const newLinkRef = cache.writeFragment({
-              data: addLink,
+          links() {
+            cache.writeFragment({
+              data: createLink,
               fragment: gql`
                 fragment NewLink on Link {
                   id
@@ -58,19 +103,15 @@ export const CreateLink = () => {
                 }
               `,
             });
-
-            return [existingLinks, newLinkRef];
           },
         },
       });
     },
   });
+
   const [newTag, setNewTag] = React.useState("");
 
-  const params = useQueryParams();
-  console.log(params.get("title"));
-  console.log(params.get("description"));
-  console.log(params.get("url"));
+  const {title, text, url} = useQueryParams();
 
   const { register, watch, errors, control, handleSubmit } = useForm<{
     url: string;
@@ -78,8 +119,8 @@ export const CreateLink = () => {
     tags: { name: string }[];
   }>({
     defaultValues: {
-      url: params.get("url") ?? "",
-      notes: prefillNotes(params.get("title") ?? "", params.get("description") ?? ""),
+      url: url,
+      notes: prefillNotes(title, text),
       tags: [],
     },
   });

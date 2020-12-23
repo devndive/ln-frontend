@@ -1,6 +1,5 @@
 import React from "react";
 
-import "@reach/dialog/styles.css";
 import "./index.scss";
 
 import { useAuth } from "./AuthProvider";

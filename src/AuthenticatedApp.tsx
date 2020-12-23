@@ -6,7 +6,6 @@ import {
   Link,
 } from "react-router-dom";
 
-import "@reach/dialog/styles.css";
 import "./index.scss";
 
 import { Links } from "./pages/Links";
