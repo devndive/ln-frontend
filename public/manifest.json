@@ -28,7 +28,7 @@
         "enctype": "application/x-www-form-urlencoded",
         "params": {
             "title": "title",
-            "text": "description",
+            "text": "text",
             "url": "url"
         }
     }

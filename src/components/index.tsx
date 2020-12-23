@@ -19,7 +19,7 @@ interface TagProps {
 
 export const Tag: React.FC<TagProps> = ({ tag, removeButtonClicked }: TagProps) => {
   return (
-    <span className="badge bg-info mt-1 mr-1">
+    <span className="badge bg-info mt-1 me-1">
       <span className="me-1" style={{ verticalAlign: "text-top" }}>
         {tag}
       </span>
