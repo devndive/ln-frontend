@@ -13,6 +13,7 @@ import { UserProvider } from "./UserProvider";
 import Amplify from "aws-amplify";
 
 import * as ServiceWorkerRegistration from "./serviceWorkerRegistration";
+import { BrowserRouter } from "react-router-dom";
 
 Amplify.configure({
   Auth: {
@@ -38,7 +39,9 @@ ReactDOM.render(
       <AuthProvider>
         <UserProvider>
           <AuthorizedApolloProvider>
-            <App />
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
           </AuthorizedApolloProvider>
         </UserProvider>
       </AuthProvider>

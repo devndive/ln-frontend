@@ -26,11 +26,29 @@ interface RegistrationData {
   password: string;
 }
 
+interface RegistrationConfirmationData {
+  email: string;
+  code: string;
+}
+
+interface ForgotPasswordData {
+  username: string;
+}
+
+interface ForgotPasswordSubmitData {
+  username: string;
+  code: string;
+  newPassword: string;
+}
+
 interface AuthContextType {
   user: User;
   isAuthenticated: boolean;
   signIn: UseMutateFunction<User, any, LoginData, unknown>;
   register: (data: RegistrationData) => Promise<any>;
+  confirmRegistration: (data: RegistrationConfirmationData) => Promise<any>;
+  forgotPassword: (data: ForgotPasswordData) => Promise<any>;
+  forgotPasswordSubmit: (data: ForgotPasswordSubmitData) => Promise<any>;
   logout: () => void;
 }
 
@@ -56,6 +74,18 @@ const AuthProvider: React.FC = (props) => {
     return Auth.signUp({ username: email, password });
   };
 
+  const confirmRegistration = ({ email, code }: RegistrationConfirmationData): Promise<any> => {
+    return Auth.confirmSignUp(email, code);
+  }
+
+  const forgotPassword = ({ username }: ForgotPasswordData): Promise<any> => {
+    return Auth.forgotPassword(username);
+  }
+
+  const forgotPasswordSubmit = ({ username, code, newPassword }: ForgotPasswordSubmitData): Promise<any> => {
+    return Auth.forgotPasswordSubmit(username, code, newPassword);
+  }
+
   const logout = (): void => {
     setIsAuthenticated(false);
     Auth.signOut();
@@ -64,8 +94,6 @@ const AuthProvider: React.FC = (props) => {
 
   React.useEffect(() => {
     if (data) {
-      Logger.log("AuthProvider::useEffect with data", data);
-
       setIsAuthenticated(true);
       setUser(data);
     }
@@ -76,7 +104,7 @@ const AuthProvider: React.FC = (props) => {
     return <div>Loading ...</div>;
   }
 
-  return <AuthContext.Provider value={{ user, isAuthenticated, signIn, logout, register }} {...props} />;
+  return <AuthContext.Provider value={{ user, isAuthenticated, signIn, logout, register, confirmRegistration, forgotPassword, forgotPasswordSubmit }} {...props} />;
 };
 
 const useAuth = () => React.useContext<AuthContextType>(AuthContext);
