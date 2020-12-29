@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
   Link,
@@ -22,7 +21,7 @@ export const AuthenticatedApp = () => {
   Logger.log("isAuthenticated", isAuthenticated);
 
   return (
-    <Router>
+    <>
       <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
         <div className="container">
           <a className="navbar-brand" href="/">
@@ -41,7 +40,7 @@ export const AuthenticatedApp = () => {
           </button>
 
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul className="navbar-nav me-auto mb-lg-0">
               <li className="nav-item">
                 <Link className="nav-link" to="/links">
                   Links
@@ -88,6 +87,6 @@ export const AuthenticatedApp = () => {
           <Route path="/"></Route>
         </Switch>
       </div>
-    </Router>
+    </>
   );
 };
