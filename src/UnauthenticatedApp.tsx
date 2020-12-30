@@ -39,7 +39,7 @@ export const UnauthenticatedApp = () => {
 
   const handleError = (e: any) => {
     Logger.error(e);
-    setState({ ...state, error: e });
+    setState({ ...state, error: e.message });
   };
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
@@ -56,13 +56,13 @@ export const UnauthenticatedApp = () => {
   };
 
   const handleRegistration = ({ username, password }: RegistrationFormData) => {
-    setState({ ...state, error: "", tmpEmail: username, tmpPassword: password });
+    setState(prevState => ({ ...prevState, error: "", tmpEmail: username, tmpPassword: password }));
 
     register({
       email: username,
       password,
     })
-      .then(() => setState({ ...state, currentStep: STEP_VERIFY }))
+      .then(() => setState(prevState => ({ ...prevState, currentStep: STEP_VERIFY })))
       .catch(handleError);
   };
 
