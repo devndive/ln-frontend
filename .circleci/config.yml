@@ -34,7 +34,10 @@ jobs:
       - aws-cli/setup
       - attach_workspace:
           at: ./build
-      - run: aws s3 sync --delete ./build s3://$S3_TARGET/
+      - run:
+          command: |
+            aws s3 sync --delete ./build s3://$S3_TARGET/ --exclude "index.html"
+            aws s3 sync --delete ./build s3://$S3_TARGET/ --cache-control "max-age=0" --include "index.html"
 
 
 workflows:
