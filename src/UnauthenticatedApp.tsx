@@ -17,7 +17,10 @@ import {
   RegistrationConfirmationData,
 } from "./components/RegistrationConfirmationForm";
 import { ResetPasswordForm, ResetPasswordFormData } from "./components/ResetPasswordForm";
-import { ResetPasswordNewPasswordForm, ResetPasswordNewPasswordFormData } from "./components/ResetPasswordNewPasswordForm";
+import {
+  ResetPasswordNewPasswordForm,
+  ResetPasswordNewPasswordFormData,
+} from "./components/ResetPasswordNewPasswordForm";
 
 const STEP_REGISTER = "REGISTER";
 const STEP_VERIFY = "VERIFY";
@@ -56,13 +59,18 @@ export const UnauthenticatedApp = () => {
   };
 
   const handleRegistration = ({ username, password }: RegistrationFormData) => {
-    setState(prevState => ({ ...prevState, error: "", tmpEmail: username, tmpPassword: password }));
+    setState((prevState) => ({
+      ...prevState,
+      error: "",
+      tmpEmail: username,
+      tmpPassword: password,
+    }));
 
     register({
       email: username,
       password,
     })
-      .then(() => setState(prevState => ({ ...prevState, currentStep: STEP_VERIFY })))
+      .then(() => setState((prevState) => ({ ...prevState, currentStep: STEP_VERIFY })))
       .catch(handleError);
   };
 
@@ -97,13 +105,16 @@ export const UnauthenticatedApp = () => {
     });
   };
 
-  const handleResetPasswordNewPassword = ({ code, newPassword }: ResetPasswordNewPasswordFormData) => {
+  const handleResetPasswordNewPassword = ({
+    code,
+    newPassword,
+  }: ResetPasswordNewPasswordFormData) => {
     setState({ ...state, error: "", tmpPassword: newPassword });
 
     forgotPasswordSubmit({
       username: state.tmpEmail,
       code: code,
-      newPassword
+      newPassword,
     })
       .then(() => signIn({ email: state.tmpEmail, password: state.tmpPassword }))
       .catch(handleError);
@@ -112,7 +123,7 @@ export const UnauthenticatedApp = () => {
   const AnimatedDialogOverlay = animated(DialogOverlay);
   const AnimatedDialogContent = animated(DialogContent);
 
-  const transitions = useTransition(state.showDialog, null, {
+  const transitions = useTransition(state.showDialog, {
     from: { opacity: 0, transform: "translate3d(0,-40px,0)" },
     enter: { opacity: 1, transform: "translate3d(0,0px,0)" },
     leave: { opacity: 0, transform: "translate3d(0,-40px,0)" },
@@ -122,43 +133,46 @@ export const UnauthenticatedApp = () => {
 
   return (
     <main className="form-signin mt-5">
-      {transitions.map(
-        ({ item, key, props: styles }) =>
-          item && (
-            <AnimatedDialogOverlay as="div" style={{ opacity: styles.opacity }} key={key}>
-              <AnimatedDialogContent
-                as="div"
-                style={{ transform: styles.transform }}
-                aria-labelledby="h1-form-title"
-              >
-                <div className="form-signin-dialog">
-                  <button className="close-button float-end" onClick={close}>
-                    <VisuallyHidden>Close</VisuallyHidden>
-                    <span aria-hidden>x</span>
-                  </button>
-                  {state.currentStep === STEP_REGISTER && (
-                    <RegistrationForm handleRegistration={handleRegistration} error={state.error} />
-                  )}
+      {transitions(({ opacity, transform }, item) => (
+        item && (<AnimatedDialogOverlay as="div" style={{ opacity: opacity }}>
+          <AnimatedDialogContent
+            as="div"
+            style={{ transform: transform }}
+            aria-labelledby="h1-form-title"
+          >
+            <div className="form-signin-dialog">
+              <button className="close-button float-end" onClick={close}>
+                <VisuallyHidden>Close</VisuallyHidden>
+                <span aria-hidden>x</span>
+              </button>
+              {state.currentStep === STEP_REGISTER && (
+                <RegistrationForm handleRegistration={handleRegistration} error={state.error} />
+              )}
 
-                  {state.currentStep === STEP_VERIFY && (
-                    <RegistrationConfirmationForm
-                      handleRegistrationConfirmation={handleRegistrationConfirmation}
-                      error={state.error}
-                    />
-                  )}
+              {state.currentStep === STEP_VERIFY && (
+                <RegistrationConfirmationForm
+                  handleRegistrationConfirmation={handleRegistrationConfirmation}
+                  error={state.error}
+                />
+              )}
 
-                  {state.currentStep === STEP_RESET_PASSWORD_USERNAME && (
-                    <ResetPasswordForm handleResetPassword={handleResetPasswordUsername} error={state.error} />
-                  )}
+              {state.currentStep === STEP_RESET_PASSWORD_USERNAME && (
+                <ResetPasswordForm
+                  handleResetPassword={handleResetPasswordUsername}
+                  error={state.error}
+                />
+              )}
 
-                  {state.currentStep === STEP_RESET_PASSWORD_NEW_PASSWORD && (
-                    <ResetPasswordNewPasswordForm handleNewPassword={handleResetPasswordNewPassword} error={state.error} />
-                  )}
-                </div>
-              </AnimatedDialogContent>
-            </AnimatedDialogOverlay>
-          )
-      )}
+              {state.currentStep === STEP_RESET_PASSWORD_NEW_PASSWORD && (
+                <ResetPasswordNewPasswordForm
+                  handleNewPassword={handleResetPasswordNewPassword}
+                  error={state.error}
+                />
+              )}
+            </div>
+          </AnimatedDialogContent>
+        </AnimatedDialogOverlay>
+      )))}
       <form onSubmit={handleLogin}>
         <h1 className="h3 mb-3 fw-normal">Please sign in</h1>
         <label htmlFor="email" className="visually-hidden">

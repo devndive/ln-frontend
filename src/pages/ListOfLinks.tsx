@@ -206,10 +206,8 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
               <p>Notes:</p>
               <ReactMarkdown
                 className="result"
-                source={link.description}
-                escapeHtml={false}
+                children={link.description}
                 plugins={[toc]}
-                disallowedTypes={[]}
               />
               <p>
                 {link.tags?.map((t) => (

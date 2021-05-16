@@ -113,7 +113,13 @@ export const CreateLink = () => {
 
   const {title, text, url} = useQueryParams();
 
-  const { register, watch, errors, control, handleSubmit } = useForm<{
+  const {
+    register,
+    watch,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{
     url: string;
     notes: string;
     tags: { name: string }[];
@@ -158,8 +164,7 @@ export const CreateLink = () => {
         </label>
         <input
           type="text"
-          name="url"
-          ref={register({ required: true })}
+          {...register("url", { required: true })}
           className={classnames("form-control", { "is-invalid": errors.url })}
         />
         {errors.url && <div className=" invalid-feedback ">Please provide a url</div>}
@@ -196,8 +201,7 @@ export const CreateLink = () => {
               Notes
             </label>
             <textarea
-              ref={register}
-              name="notes"
+              {...register("notes")}
               id="notes"
               className="form-control"
               rows={5}
@@ -208,10 +212,8 @@ export const CreateLink = () => {
 
             <ReactMarkdown
               className="result"
-              source={watch("notes", "")}
-              escapeHtml={false}
+              children={watch("notes", "")}
               plugins={[toc]}
-              disallowedTypes={[]}
             />
           </div>
         </div>

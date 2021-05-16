@@ -24,7 +24,11 @@ export const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: bool
   const history = useHistory();
   const location = useLocation<{ from: { pathname: string } }>();
 
-  const { register, handleSubmit, errors } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const { from } = location.state || { from: { pathname: "/links" } };
   const onSubmit = ({ email, password }: { email: string, password: string}) => {
@@ -63,9 +67,8 @@ export const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: bool
           <input
             id="email"
             type="text"
-            name="email"
             className={classnames("form-control", { "is-invalid": errors.email })}
-            ref={register({ required: true })}
+            {...register("email", { required: true })}
             defaultValue={""}
           />
           {errors.email && <div className=" invalid-feedback ">Please provide an email address</div> }
@@ -79,9 +82,8 @@ export const Login = ({ setIsAuthenticated }: { setIsAuthenticated: (state: bool
           <input
             id="password"
             type="password"
-            name="password"
             className={classnames("form-control", { "is-invalid": errors.password })}
-            ref={register({ required: true })}
+            {...register("password", { required: true })}
             defaultValue={""}
           />
           {errors.password && <div className="invalid-feedback">Please provide a password.</div> }
