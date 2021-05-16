@@ -134,7 +134,7 @@ export const UnauthenticatedApp = () => {
   return (
     <main className="form-signin mt-5">
       {transitions(({ opacity, transform }, item) => (
-        <AnimatedDialogOverlay as="div" style={{ opacity: opacity }}>
+        item && (<AnimatedDialogOverlay as="div" style={{ opacity: opacity }}>
           <AnimatedDialogContent
             as="div"
             style={{ transform: transform }}
@@ -172,7 +172,7 @@ export const UnauthenticatedApp = () => {
             </div>
           </AnimatedDialogContent>
         </AnimatedDialogOverlay>
-      ))}
+      )))}
       <form onSubmit={handleLogin}>
         <h1 className="h3 mb-3 fw-normal">Please sign in</h1>
         <label htmlFor="email" className="visually-hidden">
