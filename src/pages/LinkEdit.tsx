@@ -17,7 +17,14 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
 
-  const { register, watch, reset, errors, control, handleSubmit } = useForm<{
+  const {
+    register,
+    watch,
+    reset,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{
     url: string;
     notes: string;
     tags: { name: string }[];
@@ -87,9 +94,8 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
         </label>
         <input
           type="text"
-          name="url"
           id="url"
-          ref={register({ required: true })}
+          {...register("url", { required: true })}
           className={classnames("form-control", { "is-invalid": errors.url })}
         />
         {errors.url && <div className=" invalid-feedback ">Please provide a url</div>}
@@ -121,7 +127,7 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
             <label htmlFor="url" className="form-label">
               Notes
             </label>
-            <textarea name="notes" ref={register} className="form-control" rows={5}></textarea>
+            <textarea {...register("notes")} className="form-control" rows={5}></textarea>
           </div>
           <div className="col">
             <label className="form-label">&nbsp;</label>
