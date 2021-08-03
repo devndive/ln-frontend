@@ -3,7 +3,7 @@
   "version": "0.5.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "^3.3.21",
+    "@apollo/client": "^3.4.3",
     "@reach/dialog": "^0.15.3",
     "@reach/visually-hidden": "^0.16.0",
     "aws-amplify": "^4.2.2",
