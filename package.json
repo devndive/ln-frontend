@@ -6,7 +6,7 @@
     "@apollo/client": "^3.4.4",
     "@reach/dialog": "^0.16.0",
     "@reach/visually-hidden": "^0.16.0",
-    "aws-amplify": "^4.2.2",
+    "aws-amplify": "^4.2.3",
     "classnames": "^2.3.1",
     "graphql": "^15.5.1",
     "react": "^17.0.2",
