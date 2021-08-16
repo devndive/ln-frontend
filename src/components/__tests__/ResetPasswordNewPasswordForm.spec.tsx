@@ -3,7 +3,7 @@ import * as faker from "faker";
 import { ResetPasswordNewPasswordForm } from "../ResetPasswordNewPasswordForm";
 
 test('shows the registration confirmation form', async () => {
-    const code = faker.random.number({ min: 100000, max: 999999 });
+    const code = faker.datatype.number({ min: 100000, max: 999999 });
     const password = faker.internet.password();
 
     let actualCode = "";
