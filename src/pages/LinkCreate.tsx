@@ -1,4 +1,4 @@
-import toc from "remark-toc";
+import remarkToc from "remark-toc";
 import { gql, useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
@@ -12,22 +12,21 @@ import { Tag } from "../components";
  * All apps that use sharing do this differently. You have to guess in which field the url
  * could be. Therefor I am testing the strings and try to guess which one could hold the url
  * I want.
- * 
+ *
  * Sharing from chrome on android seems to put the url into the text field
- * 
+ *
  * Twitter APP on android puts the url in the title field
  */
-export function mapFieldsFromShareTarget(params: URLSearchParams)
-: {
-  title: string,
-  text: string,
-  url: string
+export function mapFieldsFromShareTarget(params: URLSearchParams): {
+  title: string;
+  text: string;
+  url: string;
 } {
   const returnValue = {
     title: params.get("title") ?? "",
     text: params.get("text") ?? "",
-    url: params.get("url") ?? ""
-  }
+    url: params.get("url") ?? "",
+  };
 
   // No URL was passed, so we try to find one in the other fields
   if (!returnValue.url) {
@@ -44,9 +43,9 @@ export function mapFieldsFromShareTarget(params: URLSearchParams)
 }
 
 function useQueryParams(): {
-  title: string,
-  text: string,
-  url: string
+  title: string;
+  text: string;
+  url: string;
 } {
   const params = new URLSearchParams(useLocation().search);
   return mapFieldsFromShareTarget(params);
@@ -111,7 +110,7 @@ export const CreateLink = () => {
 
   const [newTag, setNewTag] = React.useState("");
 
-  const {title, text, url} = useQueryParams();
+  const { title, text, url } = useQueryParams();
 
   const {
     register,
@@ -210,11 +209,7 @@ export const CreateLink = () => {
           <div className="col">
             <label className="form-label">&nbsp;</label>
 
-            <ReactMarkdown
-              className="result"
-              children={watch("notes", "")}
-              plugins={[toc]}
-            />
+            <ReactMarkdown className="result" children={watch("notes", "")} plugins={[remarkToc]} />
           </div>
         </div>
       </div>
