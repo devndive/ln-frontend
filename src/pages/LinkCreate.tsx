@@ -1,12 +1,11 @@
 import remarkToc from "remark-toc";
-import { gql, useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useHistory, useLocation } from "react-router-dom";
-import { CREATE_LINK } from "./gql";
 import { useFieldArray, useForm } from "react-hook-form";
 import classnames from "classnames";
 import { Tag } from "../components";
+import { useCreateLinkMutation } from "./hooks";
 
 /*
  * All apps that use sharing do this differently. You have to guess in which field the url
@@ -77,36 +76,7 @@ export function prefillNotes(title: string, text: string): string {
 }
 
 export const CreateLink = () => {
-  const [createLinkMutation] = useMutation(CREATE_LINK, {
-    update(cache, { data: { createLink } }) {
-      cache.modify({
-        fields: {
-          links() {
-            cache.writeFragment({
-              data: createLink,
-              fragment: gql`
-                fragment NewLink on Link {
-                  id
-                  url
-                  description
-                  metadata {
-                    id
-                    title
-                    description
-                    image
-                    estimatedTimeToRead
-                  }
-                  tags {
-                    name
-                  }
-                }
-              `,
-            });
-          },
-        },
-      });
-    },
-  });
+  const createLinkMutation = useCreateLinkMutation();
 
   const [newTag, setNewTag] = React.useState("");
 
@@ -144,15 +114,15 @@ export const CreateLink = () => {
   };
 
   const createLink = ({ url, notes }: { url: string; notes: string }) => {
-    createLinkMutation({
-      variables: {
-        url,
-        description: notes,
-        tags: fields.map((f) => f.name),
-      },
-    }).then(() => {
-      history.replace("/links");
+    createLinkMutation.mutate({
+      url,
+      description: notes,
+      tags: fields.map((f) => {
+        return { name: f.name };
+      }),
     });
+
+    history.push("/links");
   };
 
   return (

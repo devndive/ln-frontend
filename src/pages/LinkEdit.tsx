@@ -1,19 +1,15 @@
-import React from "react";
-import { useQuery, useMutation } from "@apollo/client";
+import React, { useEffect } from "react";
+import { useQuery, useMutation } from "react-query";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 import { useParams, useHistory } from "react-router-dom";
 import toc from "remark-toc";
-import { LINK_QUERY, UPDATE_LINK } from "./gql";
 import classnames from "classnames";
-import { Link, Link_link } from "./__generated__/Link";
+import { Link } from "../types";
 import { Tag } from "../components";
+import { useLink, useUpdateLinkMutation } from "./hooks";
 
-interface OwnProps {
-  link: Link_link;
-}
-
-export const EditLinkImpl: React.FC<OwnProps> = () => {
+export const EditLinkImpl: React.FC<{ link: Link }> = ({ link }) => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
 
@@ -42,37 +38,19 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
   });
 
   const [newTag, setNewTag] = React.useState("");
-  const [updateLink] = useMutation(UPDATE_LINK, {
-    onCompleted: () => {
-      history.replace("/links");
-    },
-  });
-
-  useQuery<Link>(LINK_QUERY, {
-    variables: { id: Number.parseInt(id) },
-    onCompleted: (data) => {
-      if (data && data.link) {
-        const { link } = data;
-        reset({
-          url: link.url,
-          notes: link.description,
-          tags: link.tags.map((t) => {
-            return { name: t.name };
-          }),
-        });
-      }
-    },
-  });
+  const updateLink = useUpdateLinkMutation();
 
   const saveChanges = ({ url, notes }: { url: string; notes: string }) => {
-    updateLink({
-      variables: {
-        id: Number.parseInt(id),
-        url,
-        description: notes,
-        tags: fields.map((f) => f.name),
-      },
-    }).then(() => {});
+    updateLink.mutate({
+      id: Number.parseInt(id),
+      url,
+      description: notes,
+      tags: fields.map((f) => {
+        return { name: f.name };
+      }),
+    });
+
+    history.push("/links");
   };
 
   const addNewTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -85,6 +63,16 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
       }
     }
   };
+
+  useEffect(() => {
+    reset({
+      url: link.url,
+      notes: link.description,
+      tags: link.tags.map((t) => {
+        return { name: t.name };
+      }),
+    });
+  }, [link]);
 
   return (
     <form onSubmit={handleSubmit(saveChanges)}>
@@ -154,12 +142,12 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
 export const EditLink = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { loading, error, data } = useQuery(LINK_QUERY, {
-    variables: { id: Number.parseInt(id) },
-  });
+  const { isLoading, error, data } = useLink(id);
 
-  if (loading) return <p>Loading ...</p>;
+  console.log(data);
+
+  if (isLoading) return <p>Loading ...</p>;
   if (error) return <p>Error ...</p>;
 
-  return <EditLinkImpl link={data.link} />;
+  return <div>{data && <EditLinkImpl link={data} />}</div>;
 };

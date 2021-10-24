@@ -1,17 +1,13 @@
-import React from "react";
-import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
-import { LINKS_QUERY } from "./gql";
+import { useLinks } from "./hooks";
 import { ListOfLinks } from "./ListOfLinks";
 
 export const LinksByTag = () => {
   const { tag } = useParams<{ tag: string }>();
 
-  const { data: links, loading } = useQuery(LINKS_QUERY, {
-    variables: { tag },
-  });
+  const { data: links, isLoading } = useLinks(tag);
 
-  if (loading) {
+  if (isLoading) {
     return <p>Loading ...</p>;
   }
 
@@ -19,7 +15,7 @@ export const LinksByTag = () => {
     <div>
       <h1 className="mb-4">Links</h1>
 
-      <ListOfLinks links={links.links} />
+      {links && <ListOfLinks links={links} />}
     </div>
   );
 };

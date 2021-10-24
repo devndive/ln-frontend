@@ -11,7 +11,7 @@ import { act } from "react-dom/test-utils";
 import { GraphQLError } from "graphql";
 
 describe("LoginComponent", () => {
-  test("should render without error", async () => {
+  it("should render without error", async () => {
     const setIsAuthenticated = () => {};
 
     render(
@@ -25,7 +25,7 @@ describe("LoginComponent", () => {
     expect(await screen.findByRole("button", { name: /Login/i })).toBeInTheDocument();
   });
 
-  test("should redirect to Links after successful login", async () => {
+  it("should redirect to Links after successful login", async () => {
     const setIsAuthenticated = () => {};
 
     const mocks = [
@@ -64,7 +64,7 @@ describe("LoginComponent", () => {
     expect(memoryHistory.location.pathname).toBe("/links");
   });
 
-  test("should show error in case of an error from backend", async () => {
+  it("should show error in case of an error from backend", async () => {
     const setIsAuthenticated = () => {};
 
     const mocks = [
