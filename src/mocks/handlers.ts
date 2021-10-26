@@ -1,5 +1,5 @@
 import { rest } from "msw";
-import { build, fake, sequence } from "@jackfranklin/test-data-bot";
+import { build, fake, sequence } from "@devndive/test-data-bot";
 import { Link, Metadata, Tag } from "../types";
 import { intersection } from "lodash";
 
@@ -17,7 +17,7 @@ const metadataBuilder = build<Metadata>("Metadata", {
     image: fake((f) =>
       f.image.imageUrl(640, 480, undefined, true, true).replace("lorempixel.com", "placeimg.com")
     ),
-    estimatedTimeToRead: fake((f) => f.random.number(45)),
+    estimatedTimeToRead: fake((f) => f.datatype.number(45)),
   },
 });
 
