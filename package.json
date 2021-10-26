@@ -13,7 +13,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.17.5",
-    "react-markdown": "^7.0.1",
+    "react-markdown": "^7.1.0",
     "react-query": "3.28.0",
     "react-router-dom": "^5.3.0",
     "react-scripts": "^4.0.3",
@@ -43,7 +43,7 @@
   },
   "jest": {
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-markdown|vfile|vfile-message|unist-.*|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-.*|micromark|micromark-.*|parse-entities|character-entities|remark-rehype|property-information|space-separated-tokens|comma-separated-tokens|remark-toc)/)"
+      "node_modules/(?!(react-markdown|vfile|vfile-message|unist-.*|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-.*|micromark|micromark-.*|parse-entities|character-entities|remark-rehype|property-information|space-separated-tokens|comma-separated-tokens|remark-toc|hast-util-whitespace)/)"
     ]
   },
   "scripts": {
