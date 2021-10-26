@@ -43,7 +43,7 @@
   },
   "jest": {
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-markdown|vfile|vfile-message|unist-.*|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-.*|micromark|micromark-.*|parse-entities|character-entities|remark-rehype|property-information|space-separated-tokens|comma-separated-tokens|remark-toc)/)"
+      "node_modules/(?!(react-markdown|vfile|vfile-message|unist-.*|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-.*|micromark|micromark-.*|parse-entities|character-entities|remark-rehype|property-information|space-separated-tokens|comma-separated-tokens|remark-toc|hast-util-whitespace)/)"
     ]
   },
   "scripts": {
