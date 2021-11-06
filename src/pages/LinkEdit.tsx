@@ -1,21 +1,16 @@
-import React from "react";
-import { useQuery, useMutation } from "@apollo/client";
+import React, { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import toc from "remark-toc";
-import { LINK_QUERY, UPDATE_LINK } from "./gql";
 import classnames from "classnames";
-import { Link, Link_link } from "./__generated__/Link";
+import { Link } from "../types";
 import { Tag } from "../components";
+import { useLink, useUpdateLinkMutation } from "./hooks";
 
-interface OwnProps {
-  link: Link_link;
-}
-
-export const EditLinkImpl: React.FC<OwnProps> = () => {
-  const { id } = useParams<{ id: string }>();
-  const history = useHistory();
+export const EditLinkImpl: React.FC<{ link: Link }> = ({ link }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -42,37 +37,23 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
   });
 
   const [newTag, setNewTag] = React.useState("");
-  const [updateLink] = useMutation(UPDATE_LINK, {
-    onCompleted: () => {
-      history.replace("/links");
-    },
-  });
-
-  useQuery<Link>(LINK_QUERY, {
-    variables: { id: Number.parseInt(id) },
-    onCompleted: (data) => {
-      if (data && data.link) {
-        const { link } = data;
-        reset({
-          url: link.url,
-          notes: link.description,
-          tags: link.tags.map((t) => {
-            return { name: t.name };
-          }),
-        });
-      }
-    },
-  });
+  const { mutate: updateLink, isLoading } = useUpdateLinkMutation();
 
   const saveChanges = ({ url, notes }: { url: string; notes: string }) => {
-    updateLink({
-      variables: {
+    if (id) {
+      updateLink({
         id: Number.parseInt(id),
         url,
         description: notes,
-        tags: fields.map((f) => f.name),
-      },
-    }).then(() => {});
+        tags: fields.map((f) => {
+          return { name: f.name };
+        }),
+      }, {
+        onSuccess: () => {
+          navigate("/links");
+        }
+      });
+    }
   };
 
   const addNewTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -85,6 +66,16 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
       }
     }
   };
+
+  useEffect(() => {
+    reset({
+      url: link.url,
+      notes: link.description,
+      tags: link.tags.map((t) => {
+        return { name: t.name };
+      }),
+    });
+  }, [link]);
 
   return (
     <form onSubmit={handleSubmit(saveChanges)}>
@@ -135,31 +126,30 @@ export const EditLinkImpl: React.FC<OwnProps> = () => {
             <ReactMarkdown
               className="result"
               // @ts-ignore
-              source={watch("notes", "")}
-              escapeHtml={false}
+              children={watch("notes", "")}
               plugins={[toc]}
-              disallowedTypes={[]}
+              disallowedElements={[]}
             />
           </div>
         </div>
       </div>
 
-      <button type="submit" className="btn btn-primary">
-        Save changes
+      <button type="submit" className="btn btn-primary" disabled={isLoading}>
+        { isLoading ? "Saving..." : "Save changes" }
       </button>
     </form>
   );
 };
 
 export const EditLink = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
 
-  const { loading, error, data } = useQuery(LINK_QUERY, {
-    variables: { id: Number.parseInt(id) },
-  });
+  if (id === undefined) return null;
 
-  if (loading) return <p>Loading ...</p>;
+  const { isLoading, error, data } = useLink(id);
+
+  if (isLoading) return <p>Loading ...</p>;
   if (error) return <p>Error ...</p>;
 
-  return <EditLinkImpl link={data.link} />;
+  return <div>{data && <EditLinkImpl link={data} />}</div>;
 };

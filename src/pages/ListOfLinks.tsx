@@ -1,11 +1,11 @@
-import { useMutation } from "@apollo/client";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "react-router-dom";
-import { UPDATE_METADATA_MUTATION, DELETE_LINK_MUTATION } from "./gql";
+import { Link } from "../types";
 import toc from "remark-toc";
-import { Links_links } from "./__generated__/Links";
 import { Logger } from "../Logger";
+import { Link as RouterLink } from "react-router-dom";
+
+import { useDeleteLinkMutation, useUpdateMetadataMutation } from "./hooks";
 
 const humanizeTime = (time: number | null): string => {
   if (time === null) {
@@ -31,10 +31,10 @@ const makeUrlSchemaAbsolute = (url: string): string => {
 };
 
 interface ListOfLinksProps {
-  links: Links_links[];
+  links: Link[];
 }
 
-const ShareButton: React.FC<{ link: Links_links }> = ({ link }) => {
+const ShareButton: React.FC<{ link: Link }> = ({ link }) => {
   if (!window.navigator.share) {
     return <CopyToClipBoard link={link} />;
   }
@@ -66,22 +66,25 @@ const ShareButton: React.FC<{ link: Links_links }> = ({ link }) => {
   );
 };
 
-const CopyToClipBoard: React.FC<{ link: Links_links }> = ({ link }) => {
+const CopyToClipBoard: React.FC<{ link: Link }> = ({ link }) => {
   const [didCopy, setDidCopy] = React.useState(false);
 
   const handleCopyToClipboard = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
 
-    window.navigator.clipboard.writeText(link.url)
+    window.navigator.clipboard
+      .writeText(link.url)
       .then(() => setDidCopy(true))
-      .catch(e => { Logger.error(e) })
+      .catch((e) => {
+        Logger.error(e);
+      });
   };
 
   if (!window.navigator.clipboard) {
     return null;
   }
 
-  const cssClass = didCopy ? "btn-outline-success": "btn-outline-secondary";
+  const cssClass = didCopy ? "btn-outline-success" : "btn-outline-secondary";
 
   return (
     <button type="button" className={`btn ${cssClass} ms-1`} onClick={handleCopyToClipboard}>
@@ -98,7 +101,6 @@ const CopyToClipBoard: React.FC<{ link: Links_links }> = ({ link }) => {
           <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
         </svg>
       )}
-
       {didCopy && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -115,44 +117,27 @@ const CopyToClipBoard: React.FC<{ link: Links_links }> = ({ link }) => {
           <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
           <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
         </svg>
-      )}
-      {" "}
+      )}{" "}
       Copy
     </button>
   );
 };
 
 export const ListOfLinks = ({ links }: ListOfLinksProps) => {
-  const [updateMetaDataMutation] = useMutation(UPDATE_METADATA_MUTATION);
-  const [deleteLinkMutation] = useMutation(DELETE_LINK_MUTATION, {
-    update: (cache, { data: { removeLink } }) => {
-      cache.modify({
-        fields: {
-          links(existingLinks, { readField }) {
-            return existingLinks.filter(
-              (l: any) => readField("id", l) !== readField("id", removeLink)
-            );
-          },
-        },
-      });
-    },
-  });
+  const updateMetaDataMutation = useUpdateMetadataMutation();
+  const deleteLinkMutation = useDeleteLinkMutation();
 
   const updateMetadata = (id: number) => {
-    updateMetaDataMutation({ variables: { id } }).catch((e) => {
-      Logger.error("Error", e);
-    });
+    updateMetaDataMutation.mutate({ id });
   };
 
   const deleteLink = (id: number) => {
-    deleteLinkMutation({ variables: { id } }).catch((e) => {
-      Logger.error("Error", e);
-    });
+    deleteLinkMutation.mutate({ id });
   };
 
   return (
     <>
-      {links.map((link: Links_links) => {
+      {links.map((link: Link) => {
         return (
           <div className="row mb-4 shadow " key={link.id}>
             <div className="col-sm-4 mt-3 mb-3 border-right">
@@ -196,26 +181,22 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
             </div>
             <div className="col-sm-8 mt-3 mb-3">
               <div className="float-end">
-                <Link className="btn btn-primary btn-sm me-1" to={`/links/${link.id}/edit`}>
+                <RouterLink className="btn btn-primary btn-sm me-1" to={`/links/${link.id}/edit`}>
                   edit
-                </Link>
+                </RouterLink>
                 <button className="btn btn-danger btn-sm" onClick={() => deleteLink(link.id)}>
                   delete
                 </button>
               </div>
               <p>Notes:</p>
-              <ReactMarkdown
-                className="result"
-                children={link.description}
-                plugins={[toc]}
-              />
+              <ReactMarkdown className="result" children={link.description} plugins={[toc]} />
               <p>
                 {link.tags?.map((t) => (
-                  <Link to={`/tags/${t.name}`} key={t.name}>
+                  <RouterLink to={`/tags/${t.name}`} key={t.name}>
                     <span key={t.name} className="badge bg-dark me-1">
                       {t.name}
                     </span>
-                  </Link>
+                  </RouterLink>
                 ))}
               </p>
             </div>

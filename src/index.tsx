@@ -3,10 +3,8 @@ import ReactDOM from "react-dom";
 import reportWebVitals from "./reportWebVitals";
 
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from "react-query-devtools";
 
 import { App } from "./App";
-import { AuthorizedApolloProvider } from "./AuthorizedApolloProvider";
 import { AuthProvider } from "./AuthProvider";
 import { UserProvider } from "./UserProvider";
 
@@ -15,6 +13,13 @@ import Amplify from "aws-amplify";
 import * as ServiceWorkerRegistration from "./serviceWorkerRegistration";
 import { BrowserRouter } from "react-router-dom";
 
+/*
+if (process.env.NODE_ENV === "development") {
+  const { worker } = require("./mocks/browser");
+  worker.start();
+}
+*/
+
 Amplify.configure({
   Auth: {
     region: "eu-central-1",
@@ -22,8 +27,6 @@ Amplify.configure({
     userPoolWebClientId: "c04drplrotvoads04rh6ci9ck",
   },
 });
-
-const isDevelopmentMode = process.env.NODE_ENV === "development";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,11 +41,9 @@ ReactDOM.render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <UserProvider>
-          <AuthorizedApolloProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </AuthorizedApolloProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
         </UserProvider>
       </AuthProvider>
     </QueryClientProvider>

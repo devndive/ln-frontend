@@ -1,17 +1,20 @@
-import React from "react";
-import { useQuery } from "@apollo/client";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { LINKS_QUERY } from "./gql";
+import { useLinks } from "./hooks";
 import { ListOfLinks } from "./ListOfLinks";
 
 export const LinksByTag = () => {
-  const { tag } = useParams<{ tag: string }>();
+  const { tag } = useParams();
 
-  const { data: links, loading } = useQuery(LINKS_QUERY, {
-    variables: { tag },
-  });
+  const { data: links, isLoading, refetch } = useLinks(tag, { enabled: false });
 
-  if (loading) {
+  useEffect(() => {
+    if (tag) {
+      refetch();
+    }
+  }, [tag]);
+
+  if (isLoading) {
     return <p>Loading ...</p>;
   }
 
@@ -19,7 +22,7 @@ export const LinksByTag = () => {
     <div>
       <h1 className="mb-4">Links</h1>
 
-      <ListOfLinks links={links.links} />
+      {links && <ListOfLinks links={links} />}
     </div>
   );
 };
