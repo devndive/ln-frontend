@@ -46,7 +46,7 @@ export const handlers = [
     const tags = req.url.searchParams.getAll("tags");
 
     let matchingLinks = links;
-    if (tags) {
+    if (tags.length > 0) {
       matchingLinks = matchingLinks.filter((m) => {
         const t = m.tags.map((t) => t.name);
 
@@ -57,7 +57,7 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
-        data: links,
+        data: matchingLinks,
       })
     );
   }),

@@ -13,10 +13,12 @@ import Amplify from "aws-amplify";
 import * as ServiceWorkerRegistration from "./serviceWorkerRegistration";
 import { BrowserRouter } from "react-router-dom";
 
+/*
 if (process.env.NODE_ENV === "development") {
   const { worker } = require("./mocks/browser");
   worker.start();
 }
+*/
 
 Amplify.configure({
   Auth: {

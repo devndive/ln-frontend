@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Switch,
+  Routes,
   Route,
   Link,
 } from "react-router-dom";
@@ -70,22 +70,13 @@ export const AuthenticatedApp = () => {
       </nav>
 
       <div id="main-content" className="container">
-        <Switch>
-          <Route path="/links/create">
-            <CreateLink />
-          </Route>
-          <Route path="/links/:id/edit">
-            <EditLink />
-          </Route>
-          <Route path="/links">
-            <Links />
-          </Route>
-          <Route path="/tags/:tag">
-            <LinksByTag />
-          </Route>
-
-          <Route path="/"></Route>
-        </Switch>
+        <Routes>
+          <Route path="/links/create" element={<CreateLink />} />
+          <Route path="/links/:id/edit" element={<EditLink />} />
+          <Route path="/links" element={<Links />} />
+          <Route path="/tags/:tag" element={<LinksByTag />}/ >
+          <Route path="/" />
+        </Routes>
       </div>
     </>
   );

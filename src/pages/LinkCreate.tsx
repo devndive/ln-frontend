@@ -1,7 +1,7 @@
 import remarkToc from "remark-toc";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useFieldArray, useForm } from "react-hook-form";
 import classnames from "classnames";
 import { Tag } from "../components";
@@ -105,7 +105,7 @@ export const CreateLink = () => {
     name: "tags",
   });
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const addNewTag = () => {
     if (newTag.length > 0) {
@@ -120,9 +120,9 @@ export const CreateLink = () => {
       tags: fields.map((f) => {
         return { name: f.name };
       }),
-    });
+    }, { onSuccess: () => { navigate("/links"); }});
 
-    history.push("/links");
+    ;
   };
 
   return (
@@ -184,8 +184,8 @@ export const CreateLink = () => {
         </div>
       </div>
 
-      <button type="submit" className="btn btn-primary">
-        Save
+      <button type="submit" className="btn btn-primary" disabled={createLinkMutation.isLoading}>
+        { createLinkMutation.isLoading ? "Saving" : "Save" }
       </button>
     </form>
   );

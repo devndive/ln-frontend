@@ -1,5 +1,5 @@
 import Auth from "@aws-amplify/auth";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "react-query";
 import { Link } from "../types";
 
 const defaultOptions = async () => {
@@ -11,6 +11,7 @@ const defaultOptions = async () => {
     return {
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
+        "Content-Type": "application/json",
       },
     };
   }
@@ -38,19 +39,27 @@ export const useUpdateLinkMutation = () => {
 
 export const useLink = (id: string) => {
   return useQuery<Link>(["links", id], () => {
-    return fetchWithDefaultOptions(`/api/links/${id}`).then((response) => response.json());
+    return fetchWithDefaultOptions(`/api/links/${id}`)
+      .then((response) => response.json())
+      .then((json) => { return json.data; });
   });
 };
 
 function invokeFetchLinks(tag?: string) {
-  const url = tag ? "/api/links" : `/api/links?tags=${tag}`;
+  const url = tag ? `/api/links?tags=${tag}` : "/api/links";
+
   return fetchWithDefaultOptions(url)
     .then((response) => response.json())
     .then((json) => json.data);
 }
 
-export const useLinks = (tag?: string) => {
-  return useQuery<Link[]>("links", () => invokeFetchLinks(tag));
+export function useLinks(tag?: string, options?: UseQueryOptions<Link[]>) {
+  let key = ["links"];
+  if (tag) {
+    key.push(tag);
+  }
+
+  return useQuery<Link[]>(key, () => invokeFetchLinks(tag), options);
 };
 
 export const useUpdateMetadataMutation = () => {
