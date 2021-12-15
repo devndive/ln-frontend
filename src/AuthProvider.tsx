@@ -1,14 +1,11 @@
 import React from "react";
-import Amplify, { Auth } from "aws-amplify";
 import { UseMutateFunction, useMutation, useQuery } from "react-query";
-import { Logger } from "./Logger";
+import Auth from '@aws-amplify/auth';
 
-Amplify.configure({
-  Auth: {
-    region: "eu-central-1",
-    userPoolId: "eu-central-1_txOTeKTCs",
-    userPoolWebClientId: "c04drplrotvoads04rh6ci9ck",
-  },
+Auth.configure({
+  region: "eu-central-1",
+  userPoolId: "eu-central-1_txOTeKTCs",
+  userPoolWebClientId: "c04drplrotvoads04rh6ci9ck",
 });
 
 interface User {
