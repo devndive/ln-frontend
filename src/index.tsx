@@ -8,7 +8,7 @@ import { App } from "./App";
 import { AuthProvider } from "./AuthProvider";
 import { UserProvider } from "./UserProvider";
 
-import Amplify from "aws-amplify";
+import Auth from '@aws-amplify/auth';
 
 import * as ServiceWorkerRegistration from "./serviceWorkerRegistration";
 import { BrowserRouter } from "react-router-dom";
@@ -20,12 +20,10 @@ if (process.env.NODE_ENV === "development") {
 }
 */
 
-Amplify.configure({
-  Auth: {
-    region: "eu-central-1",
-    userPoolId: "eu-central-1_txOTeKTCs",
-    userPoolWebClientId: "c04drplrotvoads04rh6ci9ck",
-  },
+Auth.configure({
+  region: "eu-central-1",
+  userPoolId: "eu-central-1_txOTeKTCs",
+  userPoolWebClientId: "c04drplrotvoads04rh6ci9ck",
 });
 
 const queryClient = new QueryClient({
