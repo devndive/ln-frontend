@@ -62,7 +62,7 @@ export const handlers = [
     );
   }),
   rest.get("/api/links/:linkId", (req, res, ctx) => {
-    const { linkId } = req.params;
+    const { linkId } = req.params as { linkId: string };
 
     const link = links.find((l) => l.id === Number.parseInt(linkId));
 
@@ -88,7 +88,7 @@ export const handlers = [
     return res(ctx.status(200), ctx.json(link));
   }),
   rest.put("/api/links/:linkId", (req, res, ctx) => {
-    const { linkId } = req.params;
+    const { linkId } = req.params as { linkId: string };
     // @ts-ignore
     const { url, description, tags } = JSON.parse(req.body);
 
@@ -103,7 +103,7 @@ export const handlers = [
     return res(ctx.status(200));
   }),
   rest.delete("/api/links/:linkId", (req, res, ctx) => {
-    const { linkId } = req.params;
+    const { linkId } = req.params as { linkId: string };
 
     links = links.filter((l) => l.id !== Number.parseInt(linkId));
 
@@ -115,7 +115,7 @@ export const handlers = [
     );
   }),
   rest.post("/api/links/:linkId/updateMetadata", (req, res, ctx) => {
-    const { linkId } = req.params;
+    const { linkId } = req.params as { linkId: string };
 
     links.forEach((l) => {
       if (l.id === Number.parseInt(linkId)) {
