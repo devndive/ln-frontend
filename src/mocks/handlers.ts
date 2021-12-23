@@ -1,5 +1,5 @@
 import { rest } from "msw";
-import { build, fake, sequence } from "@devndive/test-data-bot";
+import { build, fake, sequence } from "@jackfranklin/test-data-bot";
 import { Link, Metadata, Tag } from "../types";
 import { intersection } from "lodash";
 
