@@ -2,6 +2,7 @@ import {
   Routes,
   Route,
   Link,
+  Outlet,
 } from "react-router-dom";
 
 import "./index.scss";
@@ -13,11 +14,23 @@ import { EditLink } from "./pages/LinkEdit";
 import { LinksByTag } from "./pages/LinksByTag";
 
 import { useAuth } from "./AuthProvider";
-import { Logger } from "./Logger";
 
 export const AuthenticatedApp = () => {
-  const { isAuthenticated, logout } = useAuth();
-  Logger.log("isAuthenticated", isAuthenticated);
+  return (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Links />} />
+        <Route path="links" element={<Links />} />
+        <Route path="links/create" element={<CreateLink />} />
+        <Route path="links/:id/edit" element={<EditLink />} />
+        <Route path="tags/:tag" element={<LinksByTag />} />
+      </Route>
+    </Routes>
+  );
+};
+
+const Layout = () => {
+  const { logout } = useAuth();
 
   return (
     <>
@@ -69,13 +82,7 @@ export const AuthenticatedApp = () => {
       </nav>
 
       <div id="main-content" className="container">
-        <Routes>
-          <Route path="/links/create" element={<CreateLink />} />
-          <Route path="/links/:id/edit" element={<EditLink />} />
-          <Route path="/links" element={<Links />} />
-          <Route path="/tags/:tag" element={<LinksByTag />}/ >
-          <Route path="/" />
-        </Routes>
+        <Outlet />
       </div>
     </>
   );
