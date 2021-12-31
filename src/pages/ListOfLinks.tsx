@@ -50,7 +50,7 @@ const ShareButton: React.FC<{ link: Link }> = ({ link }) => {
   };
 
   return (
-    <button type="button" className="btn btn-secondary ms-1" onClick={handleShare}>
+    <button type="button" className="btn btn-outline-primary btn-sm" onClick={handleShare}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
@@ -61,7 +61,7 @@ const ShareButton: React.FC<{ link: Link }> = ({ link }) => {
       >
         <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
       </svg>{" "}
-      Share
+      share
     </button>
   );
 };
@@ -84,10 +84,10 @@ const CopyToClipBoard: React.FC<{ link: Link }> = ({ link }) => {
     return null;
   }
 
-  const cssClass = didCopy ? "btn-outline-success" : "btn-outline-secondary";
+  const cssClass = didCopy ? "btn-outline-success" : "btn-outline-primary";
 
   return (
-    <button type="button" className={`btn ${cssClass} ms-1`} onClick={handleCopyToClipboard}>
+    <button type="button" className={`btn ${cssClass} btn-sm`} onClick={handleCopyToClipboard}>
       {!didCopy && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +118,7 @@ const CopyToClipBoard: React.FC<{ link: Link }> = ({ link }) => {
           <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
         </svg>
       )}{" "}
-      Copy
+      copy
     </button>
   );
 };
@@ -140,10 +140,10 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
       {links.map((link: Link) => {
         return (
           <div className="row mb-4 shadow " key={link.id}>
-            <div className="col-sm-4 mt-3 mb-3 border-right">
+            <div className="col-sm-6 mt-3 mb-3 border-right">
               {link.metadata ? (
                 <div className="row">
-                  <div className="col-md-4">
+                  <div className="col-sm-4 col-2">
                     {link.metadata.image && (
                       <img
                         loading="lazy"
@@ -153,18 +153,13 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
                       />
                     )}
                   </div>
-                  <div className="col-md-8">
+                  <div className="col-sm-8 col-10">
                     <h5 className="card-title">{link.metadata.title}</h5>
                     <h6 className="card-subtitle mb-2 text-muted">
                       {humanizeTime(link.metadata.estimatedTimeToRead)}
                     </h6>
                     <p className="card-text">{link.metadata.description}</p>
 
-                    <a href={link.url} target="_blank" rel="noreferrer" className="btn btn-primary">
-                      Go read
-                    </a>
-
-                    <ShareButton link={link} />
                   </div>
                 </div>
               ) : (
@@ -179,12 +174,16 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
                 </div>
               )}
             </div>
-            <div className="col-sm-8 mt-3 mb-3">
-              <div className="float-end">
-                <RouterLink className="btn btn-primary btn-sm me-1" to={`/links/${link.id}/edit`}>
+            <div className="col-sm-6 mt-3 mb-3">
+              <div className="btn-group float-end" role="group" aria-label="Actions for the current link">
+                <a href={link.url} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
+                  read
+                </a>
+                <ShareButton link={link} />
+                <RouterLink className="btn btn-outline-primary btn-sm" to={`/links/${link.id}/edit`}>
                   edit
                 </RouterLink>
-                <button className="btn btn-danger btn-sm" onClick={() => deleteLink(link.id)}>
+                <button className="btn btn-outline-danger btn-sm" onClick={() => deleteLink(link.id)}>
                   delete
                 </button>
               </div>
