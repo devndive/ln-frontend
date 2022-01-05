@@ -16,7 +16,7 @@
     "react-query": "3.34.7",
     "react-router-dom": "^6.2.1",
     "react-scripts": "^5.0.0",
-    "react-spring": "^9.3.3",
+    "react-spring": "^9.4.0",
     "remark-toc": "^8.0.1",
     "web-vitals": "^2.1.2"
   },
