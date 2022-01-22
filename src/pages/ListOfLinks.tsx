@@ -1,7 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "../types";
-import toc from "remark-toc";
 import { Logger } from "../Logger";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -188,7 +187,7 @@ export const ListOfLinks = ({ links }: ListOfLinksProps) => {
                 </button>
               </div>
               <p>Notes:</p>
-              <ReactMarkdown className="result" children={link.description} plugins={[toc]} />
+              <ReactMarkdown className="result" children={link.description} />
               <p>
                 {link.tags?.map((t) => (
                   <RouterLink to={`/tags/${t.name}`} key={t.name}>

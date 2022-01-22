@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 import { useParams, useNavigate } from "react-router-dom";
-import toc from "remark-toc";
 import classnames from "classnames";
 import { Link } from "../types";
 import { Tag } from "../components";
@@ -127,7 +126,6 @@ export const EditLinkImpl: React.FC<{ link: Link }> = ({ link }) => {
               className="result"
               // @ts-ignore
               children={watch("notes", "")}
-              plugins={[toc]}
               disallowedElements={[]}
             />
           </div>
