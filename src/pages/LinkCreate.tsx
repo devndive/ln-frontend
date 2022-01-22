@@ -1,4 +1,3 @@
-import remarkToc from "remark-toc";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -179,7 +178,7 @@ export const CreateLink = () => {
           <div className="col">
             <label className="form-label">&nbsp;</label>
 
-            <ReactMarkdown className="result" children={watch("notes", "")} plugins={[remarkToc]} />
+            <ReactMarkdown className="result" children={watch("notes", "")} />
           </div>
         </div>
       </div>

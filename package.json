@@ -11,13 +11,12 @@
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-hook-form": "^7.24.2",
+    "react-hook-form": "^7.25.0",
     "react-markdown": "^8.0.0",
-    "react-query": "3.34.8",
+    "react-query": "3.34.11",
     "react-router-dom": "^6.2.1",
     "react-scripts": "^5.0.0",
     "react-spring": "^9.4.2",
-    "remark-toc": "^8.0.1",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
@@ -39,7 +38,7 @@
   },
   "jest": {
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-markdown|vfile|vfile-message|unist-.*|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-.*|micromark|micromark-.*|parse-entities|character-entities|remark-rehype|property-information|space-separated-tokens|comma-separated-tokens|remark-toc|hast-util-whitespace)/)"
+      "node_modules/(?!(react-markdown|vfile|vfile-message|unist-.*|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-.*|micromark|micromark-.*|parse-entities|character-entities|remark-rehype|property-information|space-separated-tokens|comma-separated-tokens|hast-util-whitespace)/)"
     ]
   },
   "proxy": "http://localhost:4000/",
