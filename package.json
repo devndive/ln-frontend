@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@aws-amplify/auth": "^4.4.0",
+    "@aws-amplify/auth": "^4.4.1",
     "@reach/dialog": "^0.16.2",
     "@reach/visually-hidden": "^0.16.0",
     "classnames": "^2.3.1",
