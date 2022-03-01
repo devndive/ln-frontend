@@ -14,7 +14,7 @@
     "react-hook-form": "^7.27.1",
     "react-markdown": "^8.0.0",
     "react-query": "3.34.16",
-    "react-router-dom": "^6.2.1",
+    "react-router-dom": "^6.2.2",
     "react-scripts": "^5.0.0",
     "react-spring": "^9.4.3",
     "web-vitals": "^2.1.4"
