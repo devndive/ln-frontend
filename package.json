@@ -20,7 +20,8 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@jackfranklin/test-data-bot": "^1.4.0",
+    "@faker-js/faker": "^6.0.0",
+    "@jackfranklin/test-data-bot": "^2.0.0",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",

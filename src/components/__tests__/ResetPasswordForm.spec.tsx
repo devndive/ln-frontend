@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 import { ResetPasswordForm } from "../ResetPasswordForm";
 
 test('shows the registration confirmation form', async () => {

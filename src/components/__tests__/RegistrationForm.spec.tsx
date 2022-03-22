@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { RegistrationForm } from "../RegistrationForm"
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 test('shows the registration form', async () => {
     const username = faker.internet.email();

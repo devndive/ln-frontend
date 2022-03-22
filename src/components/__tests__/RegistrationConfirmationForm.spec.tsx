@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { RegistrationConfirmationForm } from "../RegistrationConfirmationForm"
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 test('shows the registration confirmation form', async () => {
     const code = faker.datatype.number({ min: 100000, max: 999999 });
