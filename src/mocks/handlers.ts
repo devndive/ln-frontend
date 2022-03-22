@@ -1,32 +1,31 @@
 import { rest } from "msw";
-import { build, fake, sequence } from "@jackfranklin/test-data-bot";
+import { build, sequence } from "@jackfranklin/test-data-bot";
+import { faker } from "@faker-js/faker";
 import { Link, Metadata, Tag } from "../types";
 import { intersection } from "lodash";
 
 const tagBuilder = build<Tag>("Tag", {
   fields: {
-    name: fake((f) => f.internet.userName()),
+    name: faker.internet.userName(),
   },
 });
 
 const metadataBuilder = build<Metadata>("Metadata", {
   fields: {
     id: sequence(),
-    title: fake((f) => f.lorem.word()),
-    description: fake((f) => f.lorem.words()),
-    image: fake((f) =>
-      f.image.imageUrl(640, 480, undefined, true, true).replace("lorempixel.com", "placeimg.com")
-    ),
-    estimatedTimeToRead: fake((f) => f.datatype.number(45)),
+    title: faker.lorem.word(),
+    description: faker.lorem.words(),
+    image: faker.image.imageUrl(640, 480, undefined, true, true).replace("lorempixel.com", "placeimg.com"),
+    estimatedTimeToRead: faker.datatype.number(45),
   },
 });
 
 const linkBuilder = build<Link>("Link", {
   fields: {
     id: sequence(),
-    url: fake((f) => f.internet.url()),
-    description: fake((f) => f.lorem.words()),
-    metadata: fake((f) => metadataBuilder()),
+    url: faker.internet.url(),
+    description: faker.lorem.words(),
+    metadata: metadataBuilder(),
     tags: [],
   },
   postBuild: (link) => {
