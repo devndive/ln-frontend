@@ -1,5 +1,5 @@
 import { prefillNotes } from "../pages/LinkCreate";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 describe("LinkCreate", () => {
   it("should return empty string if title and description are missing", () => {
