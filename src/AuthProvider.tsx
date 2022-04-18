@@ -52,7 +52,11 @@ interface AuthContextType {
 // @ts-ignore
 const AuthContext = React.createContext<AuthContextType>();
 
-const AuthProvider: React.FC = (props) => {
+type AuthProviderProps = {
+  children?: React.ReactNode;
+}
+
+const AuthProvider: React.FC<AuthProviderProps> = (props) => {
   const [user, setUser] = React.useState<User>({ email: "", userId: "" });
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
