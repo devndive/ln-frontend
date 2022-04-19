@@ -1,10 +1,18 @@
 import React from "react";
 
-export const FormGroup: React.FC = ({ children }) => {
+type FormGroupProps = {
+  children?: React.ReactNode
+};
+
+export const FormGroup: React.FC<FormGroupProps> = ({ children }) => {
   return <div className="mb-3">{children}</div>;
 };
 
-export const ErrorMessage: React.FC = ({ children }) => {
+type ErrorMessageProps = {
+  children?: React.ReactNode
+};
+
+export const ErrorMessage: React.FC<ErrorMessageProps> = ({ children }) => {
   return (
     <div className="alert alert-danger" role="alert">
       {children}

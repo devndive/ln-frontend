@@ -3,7 +3,11 @@ import { useAuth } from "./AuthProvider";
 
 const UserContext = React.createContext({});
 
-const UserProvider: React.FC = (props) => {
+type UserProviderProps = {
+  children?: React.ReactNode;
+}
+
+const UserProvider: React.FC<UserProviderProps> = (props) => {
   const { user } = useAuth();
 
   return <UserContext.Provider value={{ user }} {...props} />;
