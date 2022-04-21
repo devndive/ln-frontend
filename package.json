@@ -5,7 +5,7 @@
   "type": "module",
   "dependencies": {
     "@aws-amplify/auth": "^4.5.2",
-    "@reach/dialog": "^0.16.2",
+    "@reach/dialog": "^0.17.0",
     "@reach/visually-hidden": "^0.16.0",
     "classnames": "^2.3.1",
     "lodash": "^4.17.21",
