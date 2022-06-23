@@ -15,7 +15,7 @@ const metadataBuilder = build<Metadata>("Metadata", {
     id: sequence(),
     title: faker.lorem.word(),
     description: faker.lorem.words(),
-    image: faker.image.imageUrl(640, 480, undefined, true, true).replace("lorempixel.com", "placeimg.com"),
+    image: faker.image.imageUrl(640, 480, undefined, true).replace("lorempixel.com", "placeimg.com"),
     estimatedTimeToRead: faker.datatype.number(45),
   },
 });
