@@ -1,5 +1,5 @@
 import React from "react";
-import { UseMutateFunction, useMutation, useQuery } from "react-query";
+import { UseMutateFunction, useMutation, useQuery } from "@tanstack/react-query";
 import Auth from '@aws-amplify/auth';
 
 Auth.configure({
@@ -67,7 +67,7 @@ const AuthProvider: React.FC<AuthProviderProps> = (props) => {
     })
   );
 
-  const { isLoading, error, data } = useQuery("currentAuthenticatedUser", () =>
+  const { isLoading, error, data } = useQuery(["currentAuthenticatedUser"], () =>
     Auth.currentAuthenticatedUser()
   );
 

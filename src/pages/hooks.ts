@@ -1,5 +1,5 @@
 import Auth from "@aws-amplify/auth";
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { Link } from "../types";
 
 const defaultOptions = async () => {
@@ -73,7 +73,7 @@ export const useUpdateMetadataMutation = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("links");
+        queryClient.invalidateQueries(["links"]);
       },
     }
   );
@@ -90,7 +90,7 @@ export const useDeleteLinkMutation = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("links");
+        queryClient.invalidateQueries(["links"]);
       },
     }
   );
