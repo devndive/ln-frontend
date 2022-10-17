@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@aws-amplify/auth": "^4.6.8",
+    "@aws-amplify/auth": "^4.6.10",
     "@reach/dialog": "^0.17.0",
     "@reach/visually-hidden": "^0.17.0",
     "@tanstack/react-query": "^4.10.3",
