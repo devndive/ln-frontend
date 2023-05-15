@@ -7,7 +7,7 @@
     "@aws-amplify/auth": "^5.3.5",
     "@reach/dialog": "^0.18.0",
     "@reach/visually-hidden": "^0.18.0",
-    "@tanstack/react-query": "^4.29.5",
+    "@tanstack/react-query": "^4.29.7",
     "classnames": "^2.3.2",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
